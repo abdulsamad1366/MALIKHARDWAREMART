@@ -104,7 +104,15 @@ function LoginForm() {
               className="btn-secondary"
               style={{ fontSize: '0.75rem', padding: '4px 10px' }}
             >
-              Contractor Demo Login
+              Verified Contractor
+            </button>
+            <button
+              type="button"
+              onClick={() => fillCredentials('pending@contractor.com', 'PendingPass#2026')}
+              className="btn-secondary"
+              style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+            >
+              Pending Contractor
             </button>
             <button
               type="button"
@@ -112,7 +120,7 @@ function LoginForm() {
               className="btn-secondary"
               style={{ fontSize: '0.75rem', padding: '4px 10px' }}
             >
-              Store Admin Login
+              Store Admin
             </button>
           </div>
         </div>

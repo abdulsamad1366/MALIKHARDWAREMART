@@ -43,7 +43,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       });
     }
 
-    // Return authenticated profile
+    // Return authenticated profile with verified pricing permission
     return NextResponse.json({
       authenticated: true,
       user: {
@@ -51,6 +51,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         name: userDoc.name,
         email: userDoc.email,
         role: userDoc.role,
+        isPriceVerified: userDoc.role === 'admin' || Boolean(userDoc.isPriceVerified),
         phone: userDoc.phone || '',
         addresses: userDoc.addresses || [],
       },

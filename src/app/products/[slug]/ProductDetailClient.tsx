@@ -20,6 +20,8 @@ import {
   Plus,
   Minus,
   FileCheck,
+  Clock,
+  PhoneCall,
 } from 'lucide-react';
 import { getProductImageUrl, handleImageError } from '@/lib/imageFallback';
 import { useAuth } from '@/context/AuthContext';
@@ -61,7 +63,7 @@ export default function ProductDetailClient({
   initialProduct,
 }: ProductDetailClientProps) {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isPriceVerified } = useAuth();
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState<ProductData>(initialProduct);
@@ -69,7 +71,7 @@ export default function ProductDetailClient({
   const [adding, setAdding] = useState<boolean>(false);
   const [added, setAdded] = useState<boolean>(false);
 
-  // Fetch product from /api/products/[slug] to apply server-side price gate based on auth
+  // Fetch product from /api/products/[slug] to apply server-side price gate based on auth & verification
   useEffect(() => {
     async function syncProduct() {
       try {
@@ -84,7 +86,7 @@ export default function ProductDetailClient({
     }
 
     syncProduct();
-  }, [slug, isAuthenticated]);
+  }, [slug, isAuthenticated, isPriceVerified]);
 
   // Compute fallback image per Section 5 policy
   const resolvedImageUrl = getProductImageUrl(
@@ -99,6 +101,10 @@ export default function ProductDetailClient({
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       router.push(`/login?redirect=/products/${slug}`);
+      return;
+    }
+    if (!isPriceVerified) {
+      alert('Your contractor trade account is pending administrator verification. Rates and purchasing will activate upon verification.');
       return;
     }
 
@@ -118,6 +124,10 @@ export default function ProductDetailClient({
   const handleBuyNow = async () => {
     if (!isAuthenticated) {
       router.push(`/login?redirect=/products/${slug}`);
+      return;
+    }
+    if (!isPriceVerified) {
+      alert('Your contractor trade account is pending administrator verification. Rates and purchasing will activate upon verification.');
       return;
     }
 
@@ -218,9 +228,9 @@ export default function ProductDetailClient({
             padding: '24px',
           }}
         >
-          {/* PRICE GATE: do not send price to unauthenticated requests */}
-          {isAuthenticated && typeof product.price === 'number' ? (
-            // Authenticated User: Price Unlocked
+          {/* PRICE GATE: Locked vs Pending vs Verified Presentation per Section 4.1, 4.2 & 7 */}
+          {isAuthenticated && isPriceVerified && typeof product.price === 'number' ? (
+            // Authenticated & Verified Trade Account: Price Unlocked
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <span className="price-label">Wholesale Trade Price (Excl. Tax)</span>
@@ -297,6 +307,63 @@ export default function ProductDetailClient({
               <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Check size={14} style={{ color: 'var(--color-emerald)' }} />
                 <span>Line total: ₹{(product.price * quantity).toLocaleString('en-IN')} (Saved to persistent cart)</span>
+              </div>
+            </div>
+          ) : isAuthenticated && !isPriceVerified ? (
+            // Authenticated but Pending Verification: Price Pending Admin Review
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--color-amber-bg)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--color-amber)',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Clock size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--color-amber)', marginBottom: '4px' }}>
+                    Pricing Pending Admin Approval
+                  </h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.5 }}>
+                    Your contractor trade account is active, but wholesale pricing privileges are awaiting administrator approval. We verify business credentials and GSTIN to maintain wholesale integrity.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Need urgent pricing for an ongoing project quotation?
+                </div>
+                <a
+                  href="https://wa.me/919811054321?text=Hello%20Malik%20Hardware%20Mart,%20please%20approve%20my%20wholesale%20trade%20account."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary"
+                  style={{ padding: '6px 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <PhoneCall size={14} />
+                  <span>WhatsApp: +91 98110 54321</span>
+                </a>
               </div>
             </div>
           ) : (

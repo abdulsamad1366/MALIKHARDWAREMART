@@ -107,6 +107,14 @@ export default function AdminLayout({
             <ClipboardList size={18} />
             <span>Orders Management</span>
           </Link>
+
+          <Link
+            href="/admin/customers"
+            className={`admin-nav-item ${pathname === '/admin/customers' ? 'active' : ''}`}
+          >
+            <ShieldAlert size={18} />
+            <span>Customer Approvals</span>
+          </Link>
         </nav>
 
         {/* Exit Admin to Storefront */}

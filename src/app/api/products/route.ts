@@ -32,9 +32,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '20', 10)));
     const skip = (page - 1) * limit;
 
-    // Check authentication status to determine if price should be exposed
+    // Check authentication and price verification status to determine if price should be exposed
     const authUser = await getAuthUser(req);
     const isAuthenticated = Boolean(authUser);
+    const isPriceVerified = Boolean(authUser && (authUser.role === 'admin' || authUser.isPriceVerified));
 
     // Build Mongoose filter query
     const filterQuery: Record<string, unknown> = {};
@@ -51,6 +52,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           products: [],
           pagination: { total: 0, page, limit, totalPages: 0 },
           isAuthenticated,
+          isPriceVerified,
         });
       }
     }
@@ -89,10 +91,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Process products with strict server-side price gating
     const products = rawProducts.map((p) => {
       // Create a shallow copy of product document
-      const productObj = { ...p };
+      const productObj: Record<string, unknown> = { ...p };
 
       // PRICE GATE: do not send price to unauthenticated requests
-      if (!isAuthenticated) {
+      if (!isPriceVerified) {
         delete productObj.price;
       }
 
@@ -109,8 +111,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         limit,
         totalPages: Math.ceil(total / limit),
       },
-      // Inform client whether current session is authenticated for UI state rendering
+      // Inform client of session verification state for UI rendering
       isAuthenticated,
+      isPriceVerified,
+      userRole: authUser?.role || null,
     });
   } catch (error: unknown) {
     // Log unexpected errors

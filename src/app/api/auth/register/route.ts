@@ -74,12 +74,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Hash password with bcrypt salt rounds
     const passwordHash = await hashPassword(password);
 
-    // Create new customer account in MongoDB
+    // Create new customer account in MongoDB (pricing access requires admin verification per B2B policy)
     const newUser = await User.create({
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,
       role: 'customer',
+      isPriceVerified: false,
       phone: phone ? phone.trim() : '',
       addresses: [],
     });
@@ -90,6 +91,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       email: newUser.email,
       role: newUser.role,
       name: newUser.name,
+      isPriceVerified: false,
     };
 
     // Generate signed JWT
@@ -98,12 +100,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Prepare response object
     const response = NextResponse.json({
       success: true,
-      message: 'Account created successfully',
+      message: 'Account created successfully. Wholesale pricing is pending admin verification.',
       user: {
         id: newUser._id.toString(),
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        isPriceVerified: false,
         phone: newUser.phone,
       },
     });

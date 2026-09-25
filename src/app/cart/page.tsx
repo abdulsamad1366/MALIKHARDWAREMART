@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -31,7 +32,7 @@ import { getProductImageUrl, handleImageError } from '@/lib/imageFallback';
  */
 export default function CartPage() {
   const router = useRouter();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, isPriceVerified, loading: authLoading } = useAuth();
   const { items, subtotal, updateQuantity, removeFromCart, loading: cartLoading } = useCart();
 
   // Auth Guard: redirect unauthenticated guests per Section 3
@@ -55,6 +56,48 @@ export default function CartPage() {
     return (
       <div style={{ textAlign: 'center', padding: '120px 0', color: 'var(--text-muted)' }}>
         Redirecting to trade login...
+      </div>
+    );
+  }
+
+  // Pending Trade Verification Screen: prevent unverified carts
+  if (!isPriceVerified) {
+    return (
+      <div style={{ textAlign: 'center', padding: '100px 20px', maxWidth: '560px', margin: '0 auto' }}>
+        <div
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-amber-bg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+            color: 'var(--color-amber)',
+          }}
+        >
+          <Clock size={28} />
+        </div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '12px' }}>
+          Trade Account Verification Pending
+        </h2>
+        <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '24px' }}>
+          Your contractor trade account is registered, but wholesale rates and cart purchasing require administrator approval. Contact our sales desk for immediate project clearance.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <a
+            href="https://wa.me/919811054321?text=Hello%20Malik%20Hardware%20Mart,%20please%20approve%20my%20wholesale%20trade%20account."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+          >
+            WhatsApp Support: +91 98110 54321
+          </a>
+          <Link href="/products" className="btn-secondary">
+            Return to Catalog
+          </Link>
+        </div>
       </div>
     );
   }

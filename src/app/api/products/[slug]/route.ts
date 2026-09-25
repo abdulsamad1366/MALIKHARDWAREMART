@@ -42,9 +42,10 @@ export async function GET(
     // Connect to database
     await connectToDatabase();
 
-    // Check user authentication to determine pricing visibility
+    // Check user authentication and price verification to determine pricing visibility
     const authUser = await getAuthUser(req);
     const isAuthenticated = Boolean(authUser);
+    const isPriceVerified = Boolean(authUser && (authUser.role === 'admin' || authUser.isPriceVerified));
 
     // Retrieve product and populate associated category details
     const rawProduct = await Product.findOne({ slug })
@@ -60,10 +61,10 @@ export async function GET(
     }
 
     // Clone product document to sanitize
-    const product = { ...rawProduct };
+    const product: Record<string, unknown> = { ...rawProduct };
 
     // PRICE GATE: do not send price to unauthenticated requests
-    if (!isAuthenticated) {
+    if (!isPriceVerified) {
       delete product.price;
     }
 
@@ -72,6 +73,8 @@ export async function GET(
       success: true,
       product,
       isAuthenticated,
+      isPriceVerified,
+      userRole: authUser?.role || null,
     });
   } catch (error: unknown) {
     // Log unexpected errors

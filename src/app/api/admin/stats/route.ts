@@ -43,6 +43,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       shippedOrders,
       deliveredOrders,
       recentOrders,
+      pendingVerifications,
     ] = await Promise.all([
       Product.countDocuments({}),
       Order.countDocuments({}),
@@ -52,6 +53,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       Order.countDocuments({ status: 'shipped' }),
       Order.countDocuments({ status: 'delivered' }),
       Order.find({}).sort({ createdAt: -1 }).limit(5).populate('userId', 'name email').lean(),
+      User.countDocuments({ role: 'customer', isPriceVerified: false }),
     ]);
 
     // Aggregate total gross order revenue
@@ -73,6 +75,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         shippedOrders,
         deliveredOrders,
         recentOrders,
+        pendingVerifications,
       },
     });
   } catch (error: unknown) {

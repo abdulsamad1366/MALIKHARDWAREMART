@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Lock, ShoppingCart, Check, ArrowRight } from 'lucide-react';
+import { Lock, ShoppingCart, Check, ArrowRight, Clock } from 'lucide-react';
 import { getProductImageUrl, handleImageError } from '@/lib/imageFallback';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -46,7 +46,7 @@ export default function ProductCard({
   category,
   specs = [],
 }: ProductCardProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isPriceVerified } = useAuth();
   const { addToCart } = useCart();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -148,7 +148,7 @@ export default function ProductCard({
         <div className="product-card-footer">
           {/* PRICE GATE: do not send price to unauthenticated requests */}
           {isAuthenticated && typeof price === 'number' ? (
-            // Logged-in state: Reveal price & Add to Cart button
+            // Logged-in & Verified: Reveal price & Add to Cart button
             <>
               <div className="price-unlocked-row">
                 <div className="price-val-wrapper">
@@ -162,36 +162,56 @@ export default function ProductCard({
                 onClick={handleAddToCart}
                 disabled={adding || stockStatus === 'out_of_stock'}
                 className="btn-primary"
-                style={{ width: '100%', padding: '9px 16px' }}
+                style={{ width: '100%', padding: '8px 14px' }}
               >
                 {added ? (
                   <>
-                    <Check size={16} />
+                    <Check size={15} />
                     <span>Added to Cart</span>
                   </>
                 ) : (
                   <>
-                    <ShoppingCart size={16} />
+                    <ShoppingCart size={15} />
                     <span>{adding ? 'Adding...' : 'Add to Cart'}</span>
                   </>
                 )}
               </button>
             </>
+          ) : isAuthenticated && !isPriceVerified ? (
+            // Logged-in BUT Pending Verification: Show approval pending notice
+            <div
+              style={{
+                background: '#FEF3C7',
+                border: '1px solid #FDE68A',
+                borderRadius: 'var(--radius-md)',
+                padding: '9px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '0.78rem',
+              }}
+            >
+              <Clock size={15} style={{ color: '#B45309', flexShrink: 0 }} />
+              <div>
+                <div style={{ fontWeight: 700, color: '#92400E' }}>Rates Pending Approval</div>
+                <div style={{ color: '#B45309', fontSize: '0.7rem' }}>Awaiting admin verification</div>
+              </div>
+            </div>
           ) : (
             // Guest state: Price locked; redirect on click to Login per Section 2 & 4.1
             <div className="price-locked-box">
               <div className="price-locked-text">
                 <div className="price-locked-heading">
-                  <Lock size={14} />
-                  <span>Trade Price Locked</span>
+                  <Lock size={13} />
+                  <span>Wholesale Rates Locked</span>
                 </div>
-                <span className="price-locked-sub">Login to see price & order</span>
+                <span className="price-locked-sub">Sign in to view pricing</span>
               </div>
 
               <Link
                 href={`/login?redirect=/products/${slug}`}
                 className="btn-outline-amber"
-                style={{ fontSize: '0.75rem', padding: '6px 10px', whiteSpace: 'nowrap' }}
+                style={{ fontSize: '0.75rem', padding: '5px 10px', whiteSpace: 'nowrap' }}
               >
                 <span>Login</span>
                 <ArrowRight size={12} />

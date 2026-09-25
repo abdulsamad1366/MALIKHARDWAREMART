@@ -14,6 +14,7 @@ export interface UserProfile {
   name: string;
   email: string;
   role: 'customer' | 'admin';
+  isPriceVerified?: boolean;
   phone?: string;
   addresses?: Array<{
     _id?: string;
@@ -33,6 +34,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isPriceVerified: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   register: (name: string, email: string, password: string, phone?: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
@@ -151,6 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = Boolean(user);
   const isAdmin = user?.role === 'admin';
+  const isPriceVerified = Boolean(isAdmin || user?.isPriceVerified);
 
   return (
     <AuthContext.Provider
@@ -159,6 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         isAuthenticated,
         isAdmin,
+        isPriceVerified,
         login,
         register,
         logout,

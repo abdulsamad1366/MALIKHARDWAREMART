@@ -65,12 +65,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Construct JWT authentication payload
+    // Construct JWT authentication payload with price verification status
+    const isPriceVerified = user.role === 'admin' || Boolean(user.isPriceVerified);
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
       name: user.name,
+      isPriceVerified,
     };
 
     // Generate signed JWT
@@ -79,12 +81,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Prepare response JSON
     const response = NextResponse.json({
       success: true,
-      message: 'Login successful. Wholesale trade pricing unlocked.',
+      message: isPriceVerified
+        ? 'Login successful. Wholesale trade pricing unlocked.'
+        : 'Login successful. Trade pricing pending admin verification.',
       user: {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
+        isPriceVerified,
         phone: user.phone,
       },
     });

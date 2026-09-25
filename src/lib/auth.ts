@@ -1,12 +1,14 @@
 /**
  * @file auth.ts
  * @description Authentication utilities for password hashing, JWT generation,
- * verification, and session extraction from httpOnly cookies.
+ * verification, and session extraction from httpOnly cookies with live price verification checks.
  */
 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
+import { connectToDatabase } from '@/lib/db';
+import User from '@/models/User';
 
 // Secret key for cryptographic signing of JSON Web Tokens
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_malik_hardware_jwt_key_928374829103847291028374910';
@@ -25,6 +27,7 @@ export interface AuthUserPayload {
   email: string;
   role: 'customer' | 'admin';
   name: string;
+  isPriceVerified?: boolean;
 }
 
 /**
@@ -79,29 +82,66 @@ export function verifyToken(token: string): AuthUserPayload | null {
 /**
  * Extracts and verifies authenticated user session from NextRequest.
  * Checks httpOnly cookie first, then falls back to Authorization Bearer header.
+ * Real-time checks MongoDB so admin verification takes effect immediately without requiring re-login.
  * @param {NextRequest} req - Incoming Next.js HTTP request
  * @returns {Promise<AuthUserPayload | null>} Authenticated user payload or null for guests
  */
 export async function getAuthUser(req: NextRequest): Promise<AuthUserPayload | null> {
+  let tokenString: string | null = null;
+
   // 1. Check for token stored in secure httpOnly cookie
   const cookieToken = req.cookies.get(AUTH_COOKIE_NAME)?.value;
   if (cookieToken) {
-    const user = verifyToken(cookieToken);
-    if (user) {
-      return user;
+    tokenString = cookieToken;
+  } else {
+    // 2. Check for token in standard Authorization header for API clients
+    const authHeader = req.headers.get('authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      tokenString = authHeader.substring(7);
     }
   }
 
-  // 2. Check for token in standard Authorization header for API clients
-  const authHeader = req.headers.get('authorization');
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const headerToken = authHeader.substring(7);
-    const user = verifyToken(headerToken);
-    if (user) {
-      return user;
-    }
+  // If no token was found, user is an unauthenticated guest
+  if (!tokenString) {
+    return null;
   }
 
-  // No valid credentials found; user is an unauthenticated guest
-  return null;
+  const decoded = verifyToken(tokenString);
+  if (!decoded) {
+    return null;
+  }
+
+  // Admin users always have price verification privileges
+  if (decoded.role === 'admin') {
+    return {
+      ...decoded,
+      isPriceVerified: true,
+    };
+  }
+
+  // Real-time DB lookup so when an admin verifies an account, price unlocks immediately
+  try {
+    await connectToDatabase();
+    const userDoc = await User.findById(decoded.userId)
+      .select('isPriceVerified role name email')
+      .lean();
+
+    if (userDoc) {
+      return {
+        userId: userDoc._id.toString(),
+        email: userDoc.email,
+        role: userDoc.role,
+        name: userDoc.name,
+        isPriceVerified: Boolean(userDoc.isPriceVerified),
+      };
+    }
+  } catch (err) {
+    console.error('Error fetching live user verification in getAuthUser:', err);
+  }
+
+  // Fallback to decoded token values if database is unreachable
+  return {
+    ...decoded,
+    isPriceVerified: Boolean(decoded.isPriceVerified),
+  };
 }

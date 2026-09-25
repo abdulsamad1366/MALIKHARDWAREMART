@@ -31,6 +31,7 @@ interface AdminStats {
   pendingOrders: number;
   shippedOrders: number;
   deliveredOrders: number;
+  pendingVerifications?: number;
   recentOrders: Array<{
     _id: string;
     createdAt: string;
@@ -158,19 +159,22 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Registered Trade Accounts */}
+        {/* Registered Trade Accounts & Pending Approvals */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-dim)', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 700 }}>Trade Accounts</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-md)', background: 'var(--color-emerald-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-emerald)' }}>
+            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase', fontWeight: 700 }}>Rate Approvals</span>
+            <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-md)', background: stats?.pendingVerifications ? '#FEF3C7' : 'var(--color-emerald-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: stats?.pendingVerifications ? '#B45309' : 'var(--color-emerald)' }}>
               <Users size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--text-main)' }}>
-            {stats?.totalCustomers || 0}
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: stats?.pendingVerifications ? '#B45309' : 'var(--text-main)' }}>
+            {stats?.pendingVerifications || 0} Pending
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Verified wholesale buyers
+          <div style={{ fontSize: '0.75rem', marginTop: '4px' }}>
+            <Link href="/admin/customers" style={{ color: 'var(--color-brand)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span>Review accounts ({stats?.totalCustomers || 0} total)</span>
+              <ArrowRight size={12} />
+            </Link>
           </div>
         </div>
       </div>

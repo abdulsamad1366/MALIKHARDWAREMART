@@ -192,9 +192,13 @@ function RegisterForm() {
             className="btn-primary"
             style={{ width: '100%', padding: '12px', fontSize: '0.95rem', marginTop: '10px' }}
           >
-            <span>{submitting ? 'Creating Account...' : 'Register & Unlock Pricing'}</span>
+            <span>{submitting ? 'Creating Account...' : 'Submit Trade Registration'}</span>
             <ArrowRight size={16} />
           </button>
+
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', textAlign: 'center', marginTop: '10px' }}>
+            Trade accounts undergo admin review before wholesale pricing is activated.
+          </div>
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>

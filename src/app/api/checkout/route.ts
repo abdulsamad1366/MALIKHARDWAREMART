@@ -21,12 +21,19 @@ import { getAuthUser } from '@/lib/auth';
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // 1. Authenticate user
+    // 1. Authenticate user and verify wholesale pricing permission
     const authUser = await getAuthUser(req);
     if (!authUser) {
       return NextResponse.json(
         { success: false, message: 'Authentication required to checkout' },
         { status: 401 }
+      );
+    }
+
+    if (authUser.role !== 'admin' && !authUser.isPriceVerified) {
+      return NextResponse.json(
+        { success: false, message: 'Your trade account is pending admin verification before you can checkout.' },
+        { status: 403 }
       );
     }
 

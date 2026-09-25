@@ -22,6 +22,7 @@ export interface IUser extends Document {
   email: string;
   passwordHash: string;
   role: 'customer' | 'admin';
+  isPriceVerified: boolean;
   phone?: string;
   addresses: IAddress[];
   createdAt: Date;
@@ -110,6 +111,12 @@ const UserSchema: Schema<IUser> = new Schema(
       enum: ['customer', 'admin'],
       default: 'customer',
       required: true,
+    },
+    // Administrative trade verification flag granting access to wholesale rates - Required (defaults to false for customers, true for admins)
+    isPriceVerified: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
     // Contact telephone / mobile number for trade billing - Optional
     phone: {

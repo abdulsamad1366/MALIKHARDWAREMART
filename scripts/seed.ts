@@ -389,19 +389,21 @@ async function seedDatabase(): Promise<void> {
   const createdProducts = await Product.insertMany(productDocs);
   console.log(`Created ${createdProducts.length} catalog products.`);
 
-  // 3. Seed Admin and Customer Users with secure bcrypt hashed passwords
+  // 3. Seed Admin, Verified Customer, and Pending Customer Users
   console.log('Seeding initial users...');
 
   // Salt and hash passwords using 10 bcrypt rounds
   const adminPasswordHash = await bcrypt.hash('AdminMalikHardware#2026', 10);
   const customerPasswordHash = await bcrypt.hash('CustomerPass#2026', 10);
+  const pendingPasswordHash = await bcrypt.hash('PendingPass#2026', 10);
 
-  // Admin user
+  // Admin user (always price verified)
   const adminUser = await User.create({
     name: 'Malik Store Owner',
     email: 'admin@malikhardware.com',
     passwordHash: adminPasswordHash,
     role: 'admin',
+    isPriceVerified: true,
     phone: '+91 98765 43210',
     addresses: [
       {
@@ -417,12 +419,13 @@ async function seedDatabase(): Promise<void> {
     ],
   });
 
-  // Customer user
+  // Verified Customer user (approved trade pricing)
   const customerUser = await User.create({
-    name: 'Rajesh Sharma (Contractor)',
+    name: 'Rajesh Sharma (Sharma Builders)',
     email: 'customer@sharmabuilders.com',
     passwordHash: customerPasswordHash,
     role: 'customer',
+    isPriceVerified: true,
     phone: '+91 98111 22334',
     addresses: [
       {
@@ -432,6 +435,28 @@ async function seedDatabase(): Promise<void> {
         city: 'New Delhi',
         state: 'Delhi',
         postalCode: '110020',
+        country: 'India',
+        isDefault: true,
+      },
+    ],
+  });
+
+  // Pending Customer user (awaiting admin rate verification)
+  const pendingCustomerUser = await User.create({
+    name: 'Vikas Verma (Verma Fabricators)',
+    email: 'pending@contractor.com',
+    passwordHash: pendingPasswordHash,
+    role: 'customer',
+    isPriceVerified: false,
+    phone: '+91 98222 33445',
+    addresses: [
+      {
+        fullName: 'Vikas Verma',
+        phone: '+91 98222 33445',
+        street: 'Shed 19, Mayapuri Industrial Area Phase II',
+        city: 'New Delhi',
+        state: 'Delhi',
+        postalCode: '110064',
         country: 'India',
         isDefault: true,
       },
@@ -492,8 +517,9 @@ async function seedDatabase(): Promise<void> {
 
   console.log('Database seeded successfully!');
   console.log('--------------------------------------------------');
-  console.log('Admin Account:    admin@malikhardware.com / AdminMalikHardware#2026');
-  console.log('Customer Account: customer@sharmabuilders.com / CustomerPass#2026');
+  console.log('Admin Account:        admin@malikhardware.com / AdminMalikHardware#2026 (Full Access)');
+  console.log('Verified Contractor:  customer@sharmabuilders.com / CustomerPass#2026 (Price Verified)');
+  console.log('Pending Contractor:   pending@contractor.com / PendingPass#2026 (Pending Verification)');
   console.log('--------------------------------------------------');
 
   // Disconnect cleanly from MongoDB
