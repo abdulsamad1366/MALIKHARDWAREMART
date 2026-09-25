@@ -13,6 +13,9 @@ import Cart from '../src/models/Cart';
 import Order from '../src/models/Order';
 import SiteSettings from '../src/models/SiteSettings';
 import BlogPost from '../src/models/BlogPost';
+import HeroSlide from '../src/models/HeroSlide';
+import UseCase from '../src/models/UseCase';
+import PromoBanner from '../src/models/PromoBanner';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/malik_hardware_mart';
 
@@ -34,6 +37,9 @@ async function seedDatabase(): Promise<void> {
   await Order.deleteMany({});
   await SiteSettings.deleteMany({});
   await BlogPost.deleteMany({});
+  await HeroSlide.deleteMany({});
+  await UseCase.deleteMany({});
+  await PromoBanner.deleteMany({});
 
   // 1. Seed Categories with local placeholder image fallbacks per Section 5
   console.log('Seeding categories...');
@@ -92,7 +98,62 @@ async function seedDatabase(): Promise<void> {
     catMap.set(cat.slug, cat._id as mongoose.Types.ObjectId);
   }
 
-  // 2. Seed Products
+  // 2. Seed Use Cases (Shop by Application) per docs/03-data-models.md & docs/08-homepage-layout.md
+  console.log('Seeding use cases...');
+  const useCaseDocs = [
+    {
+      name: 'Heavy Construction & Infrastructure',
+      slug: 'heavy-construction',
+      image: '/images/products/category-tools.png',
+      description: 'Heavy drilling, concrete breaking, chemical anchoring, and ground civil engineering equipment.',
+      displayOrder: 0,
+    },
+    {
+      name: 'Structural Steel Fabrication',
+      slug: 'structural-steel',
+      image: '/images/products/category-fasteners.png',
+      description: 'High tensile metric bolts, anchor rods, welding gear, and precision metal cutting discs.',
+      displayOrder: 1,
+    },
+    {
+      name: 'Commercial Electrical & Power',
+      slug: 'commercial-electrical',
+      image: '/images/products/category-electrical.png',
+      description: 'Armoured copper feeders, heavy industrial switchgear, conduit fixings, and distribution boards.',
+      displayOrder: 2,
+    },
+    {
+      name: 'Industrial Plumbing & Piping',
+      slug: 'industrial-plumbing',
+      image: '/images/products/category-plumbing.png',
+      description: 'Forged brass valves, CPVC/UPVC industrial pipes, flange gaskets, and pressure manifolds.',
+      displayOrder: 3,
+    },
+    {
+      name: 'Architectural & Door Hardware',
+      slug: 'architectural-hardware',
+      image: '/images/products/category-hardware.png',
+      description: 'Commercial mortise locks, panic bars, door closers, and stainless steel pull handles.',
+      displayOrder: 4,
+    },
+    {
+      name: 'Plant & Machinery Maintenance',
+      slug: 'plant-maintenance',
+      image: '/images/products/category-safety.png',
+      description: 'MRO maintenance spanners, industrial lubricants, safety harness gear, and workshop tools.',
+      displayOrder: 5,
+    },
+  ];
+
+  const createdUseCases = await UseCase.insertMany(useCaseDocs);
+  console.log(`Created ${createdUseCases.length} use cases.`);
+
+  const useCaseMap = new Map<string, mongoose.Types.ObjectId>();
+  for (const uc of createdUseCases) {
+    useCaseMap.set(uc.slug, uc._id as mongoose.Types.ObjectId);
+  }
+
+  // 3. Seed Products
   console.log('Seeding products...');
   const productDocs = [
     {
@@ -389,8 +450,42 @@ async function seedDatabase(): Promise<void> {
     },
   ];
 
+  // Attach UseCase taxonomy references to each product
+  const productsWithUseCases = productDocs.map((p) => {
+    const ucList: mongoose.Types.ObjectId[] = [];
+    if (p.slug.includes('drill') || p.slug.includes('hammer') || p.slug.includes('harness') || p.slug.includes('goggles')) {
+      const id = useCaseMap.get('heavy-construction');
+      if (id) ucList.push(id);
+    }
+    if (p.slug.includes('bolt') || p.slug.includes('screw') || p.slug.includes('primer') || p.slug.includes('grinder') || p.slug.includes('spanner')) {
+      const id = useCaseMap.get('structural-steel');
+      if (id) ucList.push(id);
+    }
+    if (p.slug.includes('cable') || p.slug.includes('mcb') || p.slug.includes('wire')) {
+      const id = useCaseMap.get('commercial-electrical');
+      if (id) ucList.push(id);
+    }
+    if (p.slug.includes('valve') || p.slug.includes('pipe') || p.slug.includes('wrench')) {
+      const id = useCaseMap.get('industrial-plumbing');
+      if (id) ucList.push(id);
+    }
+    if (p.slug.includes('lock') || p.slug.includes('handle') || p.slug.includes('anchor') || p.slug.includes('sealant')) {
+      const id = useCaseMap.get('architectural-hardware');
+      if (id) ucList.push(id);
+    }
+    if (p.slug.includes('spanner') || p.slug.includes('wrench') || p.slug.includes('grinder') || p.slug.includes('drill')) {
+      const id = useCaseMap.get('plant-maintenance');
+      if (id) ucList.push(id);
+    }
+    if (ucList.length === 0) {
+      const fallbackId = useCaseMap.get('heavy-construction');
+      if (fallbackId) ucList.push(fallbackId);
+    }
+    return { ...p, useCases: ucList };
+  });
+
   // Insert products into MongoDB
-  const createdProducts = await Product.insertMany(productDocs);
+  const createdProducts = await Product.insertMany(productsWithUseCases);
   console.log(`Created ${createdProducts.length} catalog products.`);
 
   // 3. Seed Admin, Verified Customer, and Pending Customer Users
@@ -630,10 +725,101 @@ Any consignment exceeding ₹50,000 in invoice value requires a Part A and Part 
 
 3. Reconciliation with GSTR-2B
 To claim full ITC under Section 16(2)(aa), the supplier must file their GSTR-1 on or before the 11th of the succeeding month, populating the recipient’s GSTR-2B. At Malik Hardware Mart, all B2B trade sales are uploaded via automated API reconciliation, ensuring 0% ITC blockages for our institutional and contractor clients.`,
-      coverImage: '/images/products/category-building.png',
+      coverImage: '/images/products/category-hardware.png',
       authorName: 'Sanjay Malik, Accounts Director',
       isPublished: true,
       publishedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000),
+    },
+  ]);
+
+  // 8. Seed Hero Slides per docs/03-data-models.md & docs/08-homepage-layout.md
+  console.log('Seeding hero carousel slides...');
+  await HeroSlide.create([
+    {
+      imageUrl: '/images/hero-banner.jpg',
+      headline: 'Heavy Duty Industrial Hardware & Power Tools',
+      subheadline: 'Direct factory distributor supplying Northern India’s largest infrastructure projects, fabrication units, and EPC builders.',
+      linkUrl: '/products',
+      buttonText: 'Explore Wholesale Catalog',
+      displayOrder: 0,
+      isActive: true,
+    },
+    {
+      imageUrl: '/images/hero-banner.jpg',
+      headline: 'Grade 8.8 & 10.9 High-Tensile Structural Fasteners',
+      subheadline: 'Certified proof loads with manufacturer 3.1 Mill Test Certificates and bulk contractor crates dispatched daily.',
+      linkUrl: '/category/fasteners-fixings',
+      buttonText: 'View Fasteners Range',
+      displayOrder: 1,
+      isActive: true,
+    },
+    {
+      imageUrl: '/images/hero-banner.jpg',
+      headline: 'Authorized Bosch Heavy-Duty Tool Center',
+      subheadline: 'Rotary hammers, angle grinders, and demolition breakers with manufacturer warranty & genuine spare parts.',
+      linkUrl: '/category/hand-power-tools',
+      buttonText: 'Browse Bosch Tools',
+      displayOrder: 2,
+      isActive: true,
+    },
+  ]);
+
+  // 9. Seed Promo Banners per docs/03-data-models.md & docs/08-homepage-layout.md
+  console.log('Seeding promotional banners...');
+  await PromoBanner.create([
+    {
+      title: 'High-Tensile Fasteners',
+      subtitle: 'Grade 8.8 & 10.9 Structural Bolts',
+      image: '/images/products/category-fasteners.png',
+      linkUrl: '/category/fasteners-fixings',
+      badge: 'Certified 3.1 MTC',
+      displayOrder: 0,
+      isActive: true,
+    },
+    {
+      title: 'Bosch Power Tools',
+      subtitle: 'Heavy-Duty SDS Rotary & Demolition',
+      image: '/images/products/category-tools.png',
+      linkUrl: '/category/hand-power-tools',
+      badge: 'Authorized Center',
+      displayOrder: 1,
+      isActive: true,
+    },
+    {
+      title: 'Chemical Anchors',
+      subtitle: 'Pure Epoxy & Vinylester Cartridges',
+      image: '/images/products/category-hardware.png',
+      linkUrl: '/use/heavy-construction',
+      badge: 'Seismic Approved',
+      displayOrder: 2,
+      isActive: true,
+    },
+    {
+      title: 'Industrial Valves & Piping',
+      subtitle: 'Forged Brass & CPVC Pressure Systems',
+      image: '/images/products/category-plumbing.png',
+      linkUrl: '/category/plumbing-pipes',
+      badge: 'ISI Marked',
+      displayOrder: 3,
+      isActive: true,
+    },
+    {
+      title: 'Architectural Door Fittings',
+      subtitle: 'Commercial Mortise Locks & Pulls',
+      image: '/images/products/category-hardware.png',
+      linkUrl: '/use/architectural-hardware',
+      badge: 'Commercial Spec',
+      displayOrder: 4,
+      isActive: true,
+    },
+    {
+      title: 'Armoured Cables & Switchgear',
+      subtitle: 'Heavy Duty Copper Feeder Cables',
+      image: '/images/products/category-electrical.png',
+      linkUrl: '/category/electrical-lighting',
+      badge: 'IS:1554 Part 1',
+      displayOrder: 5,
+      isActive: true,
     },
   ]);
 

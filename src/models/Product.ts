@@ -23,6 +23,7 @@ export interface IProduct extends Document {
   price: number;
   stockStatus: 'in_stock' | 'out_of_stock' | 'on_request';
   featured?: boolean;
+  useCases?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,6 +71,14 @@ const ProductSchema: Schema<IProduct> = new Schema(
       required: [true, 'Category reference is required'],
       index: true,
     },
+    // Multi-reference to UseCase taxonomy (docs/03-data-models.md) - Optional
+    useCases: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'UseCase',
+        index: true,
+      },
+    ],
     // Manufacturer or trade brand name (e.g., 'Bosch', 'Stanley', 'Malik Forge') - Required
     brand: {
       type: String,

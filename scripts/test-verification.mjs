@@ -395,6 +395,123 @@ async function runTestSuite() {
   assert(contactRes.status === 200, 'Trade contact inquiry submitted successfully (200 OK)');
   assert(contactData.success === true, 'Contact endpoint returns success: true');
 
+  // TEST 15: Public Hero Slides & Admin Guards
+  console.log('\n--- TEST 15: Hero Slides API (docs/08-homepage-layout.md) ---');
+  const heroRes = await fetch(`${BASE_URL}/api/hero-slides`);
+  const heroData = await heroRes.json();
+  assert(heroRes.status === 200, 'Public hero slides endpoint returns 200 OK');
+  assert(Array.isArray(heroData.slides) && heroData.slides.length >= 3, 'Active hero slides returned for carousel');
+  assert(heroData.slides[0].imageUrl && heroData.slides[0].headline, 'Slide has imageUrl and headline');
+
+  // Guest cannot access admin hero slides
+  const guestHeroAdminRes = await fetch(`${BASE_URL}/api/admin/hero-slides`);
+  assert(guestHeroAdminRes.status === 403, 'Guest cannot access admin hero slides (403 Forbidden)');
+
+  // Admin can access admin hero slides
+  const adminHeroRes = await fetch(`${BASE_URL}/api/admin/hero-slides`, {
+    headers: { Cookie: adminCookie },
+  });
+  assert(adminHeroRes.status === 200, 'Admin can access all hero slides');
+
+  // TEST 16: Use Cases & Shop by Use Filtering
+  console.log('\n--- TEST 16: Use Cases API & Product Filtering ---');
+  const useCaseRes = await fetch(`${BASE_URL}/api/use-cases`);
+  const useCaseData = await useCaseRes.json();
+  assert(useCaseRes.status === 200, 'Public use cases endpoint returns 200 OK');
+  assert(Array.isArray(useCaseData.useCases) && useCaseData.useCases.length === 6, 'All 6 seeded use cases returned');
+
+  // Test filtered product listing by useCase
+  const useCaseFilterRes = await fetch(`${BASE_URL}/api/products?useCase=heavy-construction`);
+  const useCaseFilterData = await useCaseFilterRes.json();
+  assert(useCaseFilterRes.status === 200, 'Product query with ?useCase= returns 200 OK');
+  assert(Array.isArray(useCaseFilterData.products) && useCaseFilterData.products.length > 0, 'Products matching heavy-construction returned');
+
+  // Guest price gate still holds under useCase filter
+  const leakedPriceInUseCase = useCaseFilterData.products.some((p) => 'price' in p);
+  assert(!leakedPriceInUseCase, 'PRICE GATE: Products under ?useCase= filter still omit price for guest');
+
+  // TEST 17: Promo Banners API
+  console.log('\n--- TEST 17: Promo Banners API ---');
+  const bannerRes = await fetch(`${BASE_URL}/api/promo-banners`);
+  const bannerData = await bannerRes.json();
+  assert(bannerRes.status === 200, 'Public promo banners endpoint returns 200 OK');
+  assert(Array.isArray(bannerData.banners) && bannerData.banners.length >= 6, 'All 6 seeded promo banners returned');
+  assert(bannerData.banners[0].title && bannerData.banners[0].linkUrl, 'Banner has title and linkUrl');
+
+  // Guest cannot access admin promo banners
+  const guestBannerAdminRes = await fetch(`${BASE_URL}/api/admin/promo-banners`);
+  assert(guestBannerAdminRes.status === 403, 'Guest cannot access admin promo banners (403 Forbidden)');
+
+  // Admin can access admin promo banners
+  const adminBannerRes = await fetch(`${BASE_URL}/api/admin/promo-banners`, {
+    headers: { Cookie: adminCookie },
+  });
+  assert(adminBannerRes.status === 200, 'Admin can access all promo banners');
+
+  // TEST 18: Admin Mutation Lifecycle on HeroSlide, UseCase, and PromoBanner
+  console.log('\n--- TEST 18: Admin Mutation Lifecycles ---');
+  // Create temp slide
+  const createSlideRes = await fetch(`${BASE_URL}/api/admin/hero-slides`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({
+      imageUrl: '/images/hero-banner.jpg',
+      headline: 'Automated Test Slide',
+      subheadline: 'Temporary slide for verification',
+      displayOrder: 99,
+    }),
+  });
+  const createSlideData = await createSlideRes.json();
+  assert(createSlideRes.status === 201, 'Admin can create hero slide (201 Created)');
+
+  // Delete temp slide
+  const deleteSlideRes = await fetch(`${BASE_URL}/api/admin/hero-slides/${createSlideData.slide._id}`, {
+    method: 'DELETE',
+    headers: { Cookie: adminCookie },
+  });
+  assert(deleteSlideRes.status === 200, 'Admin can delete hero slide (200 OK)');
+
+  // Create temp use case
+  const createUcRes = await fetch(`${BASE_URL}/api/admin/use-cases`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({
+      name: 'Automated Test Application',
+      slug: 'automated-test-app',
+      image: '/images/products/default-product.png',
+      displayOrder: 99,
+    }),
+  });
+  const createUcData = await createUcRes.json();
+  assert(createUcRes.status === 201, 'Admin can create use case (201 Created)');
+
+  // Delete temp use case
+  const deleteUcRes = await fetch(`${BASE_URL}/api/admin/use-cases/${createUcData.useCase._id}`, {
+    method: 'DELETE',
+    headers: { Cookie: adminCookie },
+  });
+  assert(deleteUcRes.status === 200, 'Admin can delete use case (200 OK)');
+
+  // Create temp promo banner
+  const createBannerRes = await fetch(`${BASE_URL}/api/admin/promo-banners`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({
+      title: 'Automated Test Banner',
+      linkUrl: '/products',
+      displayOrder: 99,
+    }),
+  });
+  const createBannerData = await createBannerRes.json();
+  assert(createBannerRes.status === 201, 'Admin can create promo banner (201 Created)');
+
+  // Delete temp promo banner
+  const deleteBannerRes = await fetch(`${BASE_URL}/api/admin/promo-banners/${createBannerData.banner._id}`, {
+    method: 'DELETE',
+    headers: { Cookie: adminCookie },
+  });
+  assert(deleteBannerRes.status === 200, 'Admin can delete promo banner (200 OK)');
+
   // Summary
   console.log('\n====================================================');
   console.log(`TEST SUITE RESULTS: ${passed} PASSED, ${failed} FAILED`);

@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import Product from '@/models/Product';
 import Category from '@/models/Category';
+import UseCase from '@/models/UseCase';
 import { getAuthUser } from '@/lib/auth';
 
 /**
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Extract query parameters from request URL
     const searchParams = req.nextUrl.searchParams;
     const categorySlug = searchParams.get('category');
+    const useCaseSlug = searchParams.get('useCase');
     const brand = searchParams.get('brand');
     const search = searchParams.get('search');
     const featured = searchParams.get('featured');
@@ -47,6 +49,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         filterQuery.category = categoryDoc._id;
       } else {
         // Return empty result set if category slug does not exist
+        return NextResponse.json({
+          success: true,
+          products: [],
+          pagination: { total: 0, page, limit, totalPages: 0 },
+          isAuthenticated,
+          isPriceVerified,
+        });
+      }
+    }
+
+    // Filter by useCase slug if provided (docs/08-homepage-layout.md)
+    if (useCaseSlug) {
+      const useCaseDoc = await UseCase.findOne({ slug: useCaseSlug }).select('_id');
+      if (useCaseDoc) {
+        filterQuery.useCases = useCaseDoc._id;
+      } else {
         return NextResponse.json({
           success: true,
           products: [],

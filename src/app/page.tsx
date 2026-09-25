@@ -4,8 +4,14 @@
  * @file page.tsx
  * @route /
  * @description Homepage of Malik Hardware Mart.
- * Displays the hero banner, trust signals, featured categories grid,
- * and featured hardware products with Section 7 server-side price gating.
+ * Structured per docs/08-homepage-layout.md:
+ * 1. Full-width Hero Carousel
+ * 2. "Shop by Category" Circular Grid
+ * 3. Promo Banner Strip (Row 1)
+ * 4. "Shop by Use" Circular Grid
+ * 5. Promo Banner Strip (Row 2)
+ * 6. Featured Products Grid (with Section 7 server-side price gating)
+ * 7. Institutional Contractor Trust Signals & B2B Trade Callout
  */
 
 import React, { useEffect, useState } from 'react';
@@ -17,18 +23,16 @@ import {
   CheckCircle,
   FileText,
   Lock,
+  Sparkles,
+  Building2,
+  Clock,
+  Award,
 } from 'lucide-react';
+import HeroCarousel from '@/components/HeroCarousel';
+import CategoryGrid from '@/components/CategoryGrid';
+import PromoBannerStrip from '@/components/PromoBannerStrip';
 import ProductCard from '@/components/ProductCard';
-import CategoryCard from '@/components/CategoryCard';
 import { useAuth } from '@/context/AuthContext';
-
-interface CategoryItem {
-  _id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  placeholderImage?: string;
-}
 
 interface ProductItem {
   _id: string;
@@ -50,173 +54,97 @@ interface ProductItem {
  * Homepage Component.
  */
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
-  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const { isAuthenticated, isPriceVerified } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch categories and featured products from server API
+  // Fetch featured products from server API
   useEffect(() => {
-    async function loadHomeData() {
+    async function loadFeatured() {
       try {
         setLoading(true);
-        // Load categories
-        const catRes = await fetch('/api/categories');
-        const catData = await catRes.json();
-        if (catData.success) {
-          setCategories(catData.categories || []);
-        }
-
-        // Load featured products (PRICE GATE enforced server-side inside /api/products)
+        // Server-side price gate is evaluated in this API call
         const prodRes = await fetch('/api/products?featured=true&limit=8');
         const prodData = await prodRes.json();
         if (prodData.success) {
           setFeaturedProducts(prodData.products || []);
         }
       } catch (err) {
-        console.error('Failed to load homepage data:', err);
+        console.error('Failed to load featured products:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    loadHomeData();
-  }, [isAuthenticated]); // Re-fetch when auth state changes so prices unlock instantly
+    loadFeatured();
+  }, [isAuthenticated, isPriceVerified]);
 
   return (
-    <div>
-      {/* Hero Banner Section */}
-      <section className="hero-section">
-        <div className="container hero-grid">
-          <div className="hero-content">
-            <div className="hero-pill">
-              <Shield size={14} />
-              <span>Direct Wholesale Distributor</span>
-            </div>
+    <div style={{ background: 'var(--bg-primary)' }}>
+      {/* 1. Full-Width Edge-To-Edge Hero Carousel */}
+      <HeroCarousel />
 
-            <h1 className="hero-title">
-              Heavy Duty <span>Industrial Hardware</span> & Power Tools
-            </h1>
+      {/* 2. "Shop by Category" Circular Grid */}
+      <CategoryGrid source="category" />
 
-            <p className="hero-description">
-              India’s trusted supplier for high tensile fasteners, structural fittings,
-              commercial electrical switchgear, CPVC piping, and contractor equipment.
-              Trade pricing reserved for verified builders and industrial buyers.
-            </p>
+      {/* 3. Promo Banner Strip (Row 1: Banners 0-2) */}
+      <PromoBannerStrip startIndex={0} limit={3} />
 
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '8px' }}>
-              <Link href="/products" className="btn-primary" style={{ padding: '12px 26px', fontSize: '1rem' }}>
-                <span>Explore Catalog</span>
-                <ArrowRight size={18} />
-              </Link>
-              {!isAuthenticated && (
-                <Link href="/login" className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}>
-                  <Lock size={16} style={{ color: 'var(--color-amber)' }} />
-                  <span>Login to View Pricing</span>
-                </Link>
-              )}
-            </div>
+      {/* 4. "Shop by Use" Circular Grid */}
+      <CategoryGrid source="useCase" />
 
-            {/* Trust Points */}
-            <div className="hero-features">
-              <div className="hero-feature-item">
-                <CheckCircle size={16} className="hero-feature-icon" />
-                <span>GST Tax Invoicing</span>
-              </div>
-              <div className="hero-feature-item">
-                <Truck size={16} className="hero-feature-icon" />
-                <span>Nationwide Bulk Dispatch</span>
-              </div>
-              <div className="hero-feature-item">
-                <FileText size={16} className="hero-feature-icon" />
-                <span>OEM Test Certificates</span>
-              </div>
-            </div>
-          </div>
+      {/* 5. Promo Banner Strip (Row 2: Banners 3-5) */}
+      <PromoBannerStrip startIndex={3} limit={3} />
 
-          {/* Hero Warehouse Display Image */}
-          <div className="hero-image-wrapper">
-            <img
-              src="/images/products/default-product.jpg"
-              alt="Malik Hardware Mart Warehouse"
-              className="hero-image"
-              onError={(e) => {
-                e.currentTarget.src = '/images/products/default-product.png';
-              }}
-            />
-            <div className="hero-image-overlay">
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--color-amber)', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Stock Hub Delhi
-                </div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>Ready Dispatch Inventory</div>
-              </div>
-              <span className="stock-in" style={{ padding: '4px 10px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
-                10,000+ SKUs Active
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories Grid Section */}
-      <section style={{ padding: '60px 0' }}>
+      {/* 6. Featured Products Grid Section */}
+      <section
+        style={{
+          padding: '60px 0',
+          background: 'var(--bg-secondary)',
+          borderTop: '1px solid var(--border-subtle)',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
+      >
         <div className="container">
-          <div className="section-header">
+          <div className="section-header" style={{ marginBottom: '32px' }}>
             <div>
-              <h2 className="section-title">Wholesale Hardware Categories</h2>
-              <p className="section-subtitle">
-                Select a division to inspect specs, technical standards, and available stock
-              </p>
-            </div>
-            <Link href="/products" className="btn-outline-amber" style={{ fontSize: '0.85rem' }}>
-              <span>View All Categories</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          <div className="categories-grid">
-            {categories.map((category) => (
-              <CategoryCard
-                key={category._id}
-                id={category._id}
-                name={category.name}
-                slug={category.slug}
-                description={category.description}
-                placeholderImage={category.placeholderImage}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products Grid Section */}
-      <section style={{ padding: '60px 0', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-subtle)' }}>
-        <div className="container">
-          <div className="section-header">
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span className="top-notice-badge">Featured Dispatch</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <span
+                  style={{
+                    background: 'var(--color-amber-bg)',
+                    color: 'var(--color-amber)',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    padding: '3px 9px',
+                    borderRadius: 'var(--radius-full)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                  }}
+                >
+                  Spotlight Inventory
+                </span>
                 {!isAuthenticated && (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-amber)', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)', fontWeight: 600 }}>
                     • Trade Pricing Hidden For Guests
                   </span>
                 )}
               </div>
-              <h2 className="section-title">Spotlight Trade Inventory</h2>
-              <p className="section-subtitle">
-                High-demand industrial tools and structural hardware ready for instant site delivery
+              <h2 className="section-title" style={{ fontSize: '2rem', fontWeight: 900 }}>
+                High-Demand Industrial Fasteners & Power Tools
+              </h2>
+              <p className="section-subtitle" style={{ color: 'var(--text-muted)' }}>
+                Certified contractor-grade inventory ready for same-day dispatch from our Central Delhi logistics hub.
               </p>
             </div>
-            <Link href="/products" className="btn-secondary" style={{ fontSize: '0.85rem' }}>
-              <span>Full Catalog ({featuredProducts.length} Items)</span>
+            <Link href="/products" className="btn btn-outline" style={{ fontSize: '0.86rem' }}>
+              <span>View Full Catalog</span>
               <ArrowRight size={14} />
             </Link>
           </div>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
-              Loading wholesale inventory...
+              Loading featured inventory...
             </div>
           ) : (
             <div className="products-grid">
@@ -239,49 +167,126 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* B2B Trade Call-To-Action Banner */}
-      {!isAuthenticated && (
-        <section style={{ padding: '70px 0' }}>
-          <div className="container">
+      {/* 7. Institutional Trust Signals & Contractor B2B Callout */}
+      <section style={{ padding: '56px 0', background: 'var(--bg-primary)' }}>
+        <div className="container">
+          {/* Trust badges row */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '24px',
+              marginBottom: '48px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+                <Truck size={20} />
+              </div>
+              <div>
+                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                  Same-Day Site Freight
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Dedicated fleet dispatch across Delhi-NCR & Northern industrial corridors.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+                <FileText size={20} />
+              </div>
+              <div>
+                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                  100% GST ITC Invoicing
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Automated GSTR-2B compliance & E-Way bills generated per consignment.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+                <Award size={20} />
+              </div>
+              <div>
+                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                  3.1 Mill Test Certificates
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Chemical analysis & proof-load certified for structural PEB compliance.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+                <Building2 size={20} />
+              </div>
+              <div>
+                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                  Direct Factory Tie-ups
+                </h4>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                  Authorized wholesale channels for Bosch, Tata Steel, Hilti, Fischer.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Guest B2B Trade Call-To-Action Banner */}
+          {!isAuthenticated && (
             <div
               style={{
-                background: 'linear-gradient(135deg, #131D31 0%, #1A2642 100%)',
-                border: '1px solid var(--color-amber)',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-medium)',
                 borderRadius: 'var(--radius-lg)',
-                padding: '48px',
+                padding: '40px 48px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-                gap: '28px',
-                boxShadow: 'var(--shadow-amber)',
+                gap: '24px',
               }}
             >
               <div style={{ maxWidth: '640px' }}>
-                <div style={{ color: 'var(--color-amber)', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
-                  Trade Account Benefits
-                </div>
-                <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '12px' }}>
-                  Register Your Business To Unlock Wholesale Pricing
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: 'var(--color-amber)',
+                    fontWeight: 800,
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <Lock size={12} /> Commercial Trade Desk
+                </span>
+                <h3 style={{ fontSize: '1.65rem', fontWeight: 900, marginBottom: '8px', color: 'var(--text-main)' }}>
+                  Register Your Trade Account To Unlock Wholesale Rates
                 </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                  Direct access to tiered contractor discounts, GST compliant invoices,
-                  custom bulk delivery scheduling, and persistent trade cart management.
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.94rem', lineHeight: 1.6, margin: 0 }}>
+                  Institutional pricing, bulk carton discount slabs, credit terms, and project consignments are gated behind trade verification.
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-                <Link href="/register" className="btn-primary" style={{ padding: '12px 28px', fontSize: '1rem' }}>
-                  Create Account
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <Link href="/register" className="btn btn-primary" style={{ padding: '12px 24px', fontSize: '0.95rem' }}>
+                  Register Commercial Account
                 </Link>
-                <Link href="/login" className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}>
-                  Sign In
+                <Link href="/login" className="btn btn-outline" style={{ padding: '12px 20px', fontSize: '0.95rem' }}>
+                  Contractor Sign In
                 </Link>
               </div>
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
     </div>
   );
 }
