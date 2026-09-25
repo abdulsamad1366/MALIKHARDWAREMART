@@ -141,7 +141,7 @@ export default function NavBottom() {
                     <Link
                       key={cat._id}
                       href={`/category/${cat.slug}`}
-                      className="category-dropdown-item"
+                      className={`category-dropdown-item ${pathname === `/category/${cat.slug}` ? 'active' : ''}`}
                       role="menuitem"
                       onClick={() => setDropdownOpen(false)}
                     >

@@ -1461,11 +1461,21 @@ input, select, textarea {
   border: none;
 }
 
-.nav-bottom-link:hover,
-.nav-bottom-link.active {
+.nav-bottom-link:hover {
   color: var(--text-main);
   background: var(--bg-secondary);
   font-weight: 600;
+}
+
+.nav-bottom-link.active {
+  color: #DC2626;
+  background: rgba(220, 38, 38, 0.08);
+  font-weight: 700;
+}
+
+.nav-bottom-link.active:hover {
+  color: #B91C1C;
+  background: rgba(220, 38, 38, 0.12);
 }
 
 .nav-dropdown-wrapper {
@@ -1544,7 +1554,13 @@ input, select, textarea {
 
 .category-dropdown-item:hover {
   background: var(--bg-secondary);
-  color: var(--color-amber);
+  color: #DC2626;
+}
+
+.category-dropdown-item.active {
+  color: #DC2626;
+  background: rgba(220, 38, 38, 0.08);
+  font-weight: 700;
 }
 
 .categories-dropdown-footer {
