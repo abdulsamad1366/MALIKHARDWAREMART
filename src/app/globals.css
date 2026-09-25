@@ -1429,16 +1429,17 @@ input, select, textarea {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  overflow-x: auto;
+  overflow: visible;
   white-space: nowrap;
   padding-top: 4px;
   padding-bottom: 4px;
-  scrollbar-width: none;
 }
 
 @media (max-width: 600px) {
   .nav-bottom-inner {
     justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 }
 
@@ -1484,14 +1485,35 @@ input, select, textarea {
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 120;
+  z-index: 1000;
   width: 280px;
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 12px;
-  margin-top: 4px;
+  margin-top: 2px;
+}
+
+.categories-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+@media (max-width: 600px) {
+  .categories-dropdown-menu {
+    position: fixed;
+    top: auto;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: calc(100vw - 24px);
+    z-index: 1001;
+  }
 }
 
 .categories-dropdown-header {

@@ -52,10 +52,24 @@ export default function NavBottom() {
     };
   }, []);
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setDropdownOpen(false);
+    }, 180);
+  };
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
         setDropdownOpen(false);
       }
     }
@@ -63,11 +77,13 @@ export default function NavBottom() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
   // Close dropdown on route change
   useEffect(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setDropdownOpen(false);
   }, [pathname]);
 
@@ -88,13 +104,13 @@ export default function NavBottom() {
         <div
           ref={dropdownRef}
           className="nav-dropdown-wrapper"
-          onMouseEnter={() => setDropdownOpen(true)}
-          onMouseLeave={() => setDropdownOpen(false)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           <button
             type="button"
             className={`nav-bottom-link nav-dropdown-trigger ${isCategoryActive ? 'active' : ''}`}
-            onClick={() => setDropdownOpen(!dropdownOpen)}
+            onClick={() => setDropdownOpen((prev) => !prev)}
             aria-expanded={dropdownOpen}
             aria-haspopup="true"
           >
