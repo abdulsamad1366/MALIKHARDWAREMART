@@ -1165,51 +1165,31 @@ input, select, textarea {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* Part 1: Marquee Banner */
+/* Part 1: Marquee Banner - Dark Edge-to-Edge */
 .marquee-band {
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 6px 0;
-  font-size: 0.8rem;
-  color: var(--text-main);
+  background: #0F172A;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 0;
+  font-size: 0.82rem;
+  color: #F8FAFC;
   overflow: hidden;
-}
-
-.marquee-content-container {
-  display: flex;
-  align-items: center;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 20px;
-  gap: 12px;
-}
-
-.marquee-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--color-amber-bg);
-  color: var(--color-amber);
-  font-weight: 700;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .marquee-scroll-window {
-  flex: 1;
+  width: 100%;
   overflow: hidden;
   white-space: nowrap;
   position: relative;
+  display: flex;
 }
 
 .marquee-track {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   white-space: nowrap;
-  animation: marquee-scroll 32s linear infinite;
+  animation: marquee-scroll 50s linear infinite;
+  will-change: transform;
 }
 
 .marquee-track:hover {
@@ -1218,11 +1198,14 @@ input, select, textarea {
 
 .marquee-item {
   font-weight: 500;
+  color: #F8FAFC;
+  letter-spacing: 0.02em;
 }
 
 .marquee-separator {
-  margin: 0 14px;
+  margin: 0 24px;
   color: var(--color-amber);
+  font-size: 0.95rem;
 }
 
 @keyframes marquee-scroll {
@@ -1441,12 +1424,19 @@ input, select, textarea {
 .nav-bottom-inner {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
   overflow-x: auto;
   white-space: nowrap;
   padding-top: 4px;
   padding-bottom: 4px;
   scrollbar-width: none;
+}
+
+@media (max-width: 600px) {
+  .nav-bottom-inner {
+    justify-content: flex-start;
+  }
 }
 
 .nav-bottom-inner::-webkit-scrollbar {

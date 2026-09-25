@@ -8,7 +8,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Megaphone } from 'lucide-react';
 
 interface MarqueeBarProps {
   initialMessage?: string;
@@ -55,19 +54,27 @@ export default function MarqueeBar({ initialMessage = '' }: MarqueeBarProps) {
 
   return (
     <div className="marquee-band" role="region" aria-label="Store Announcement">
-      <div className="marquee-content-container">
-        <div className="marquee-badge">
-          <Megaphone size={13} className="marquee-badge-icon" />
-          <span>Notice</span>
-        </div>
-        <div className="marquee-scroll-window">
-          <div className="marquee-track">
-            <span className="marquee-item">{displayMessage}</span>
-            <span className="marquee-separator">•</span>
-            <span className="marquee-item">{displayMessage}</span>
-            <span className="marquee-separator">•</span>
-            <span className="marquee-item">{displayMessage}</span>
-          </div>
+      <div className="marquee-scroll-window">
+        <div className="marquee-track">
+          {/* First loop segment */}
+          <span className="marquee-item">{displayMessage}</span>
+          <span className="marquee-separator">•</span>
+          <span className="marquee-item">{displayMessage}</span>
+          <span className="marquee-separator">•</span>
+          <span className="marquee-item">{displayMessage}</span>
+          <span className="marquee-separator">•</span>
+          <span className="marquee-item">{displayMessage}</span>
+          <span className="marquee-separator">•</span>
+
+          {/* Second identical loop segment for seamless -50% translateX loop */}
+          <span className="marquee-item" aria-hidden="true">{displayMessage}</span>
+          <span className="marquee-separator" aria-hidden="true">•</span>
+          <span className="marquee-item" aria-hidden="true">{displayMessage}</span>
+          <span className="marquee-separator" aria-hidden="true">•</span>
+          <span className="marquee-item" aria-hidden="true">{displayMessage}</span>
+          <span className="marquee-separator" aria-hidden="true">•</span>
+          <span className="marquee-item" aria-hidden="true">{displayMessage}</span>
+          <span className="marquee-separator" aria-hidden="true">•</span>
         </div>
       </div>
     </div>
