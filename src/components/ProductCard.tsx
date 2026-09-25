@@ -13,6 +13,7 @@ import { Lock, ShoppingCart, Check, ArrowRight, Clock } from 'lucide-react';
 import { getProductImageUrl, handleImageError } from '@/lib/imageFallback';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { motion } from 'framer-motion';
 
 export interface ProductCardProps {
   id: string;
@@ -105,7 +106,11 @@ export default function ProductCard({
   };
 
   return (
-    <div className="product-card">
+    <motion.div
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="product-card"
+    >
       {/* Product Image with Fallback */}
       <div className="product-card-image-wrap">
         <Link href={`/products/${slug}`}>
@@ -148,34 +153,44 @@ export default function ProductCard({
         <div className="product-card-footer">
           {/* PRICE GATE: do not send price to unauthenticated requests */}
           {isAuthenticated && typeof price === 'number' ? (
-            // Logged-in & Verified: Reveal price & Add to Cart button
+            // Logged-in & Verified: Reveal price & Add to Cart button with motion
             <>
-              <div className="price-unlocked-row">
+              <motion.div
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="price-unlocked-row"
+              >
                 <div className="price-val-wrapper">
                   <span className="price-label">Trade Wholesale</span>
                   <div className="price-val">₹{price.toLocaleString('en-IN')}</div>
                 </div>
                 <span className="tax-badge">+ 18% GST</span>
-              </div>
+              </motion.div>
 
-              <button
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 onClick={handleAddToCart}
                 disabled={adding || stockStatus === 'out_of_stock'}
                 className="btn-primary"
                 style={{ width: '100%', padding: '8px 14px' }}
               >
                 {added ? (
-                  <>
+                  <motion.span
+                    initial={{ scale: 0.7 }}
+                    animate={{ scale: 1 }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
                     <Check size={15} />
                     <span>Added to Cart</span>
-                  </>
+                  </motion.span>
                 ) : (
                   <>
                     <ShoppingCart size={15} />
                     <span>{adding ? 'Adding...' : 'Add to Cart'}</span>
                   </>
                 )}
-              </button>
+              </motion.button>
             </>
           ) : isAuthenticated && !isPriceVerified ? (
             // Logged-in BUT Pending Verification: Show approval pending notice
@@ -220,6 +235,6 @@ export default function ProductCard({
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

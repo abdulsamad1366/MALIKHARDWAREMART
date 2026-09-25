@@ -60,9 +60,13 @@
   --radius-full: 9999px;
   --header-height: 72px;
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 200ms ease;
+  /* Transitions & Motion per docs/09-design-motion-guidelines.md */
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-apple: cubic-bezier(0.4, 0, 1, 1);
+  --duration-micro: 200ms;
+  --duration-medium: 350ms;
 }
 
 /* Global Reset */
@@ -70,6 +74,28 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Accessible Focus Visible Ring */
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+/* Global Reduced-Motion Accessibility Reset per docs/09-design-motion-guidelines.md Section 4 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
 html,

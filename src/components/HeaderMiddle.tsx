@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { motion } from 'framer-motion';
 
 /**
  * HeaderMiddle component.
@@ -120,9 +121,16 @@ export default function HeaderMiddle() {
             <ShoppingCart size={20} />
             <span className="cart-action-label">Cart</span>
             {itemCount > 0 && (
-              <span className="cart-badge-pill" aria-label={`${itemCount} items in cart`}>
+              <motion.span
+                key={itemCount}
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+                className="cart-badge-pill"
+                aria-label={`${itemCount} items in cart`}
+              >
                 {itemCount}
-              </span>
+              </motion.span>
             )}
           </Link>
 

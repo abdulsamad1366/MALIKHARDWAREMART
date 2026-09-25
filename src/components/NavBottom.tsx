@@ -12,6 +12,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, ArrowRight, Grid } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CategoryItem {
   _id: string;
@@ -105,37 +106,46 @@ export default function NavBottom() {
             />
           </button>
 
-          {/* Dropdown Menu Panel */}
-          {dropdownOpen && (
-            <div className="categories-dropdown-menu" role="menu">
-              <div className="categories-dropdown-header">
-                Industrial Hardware Divisions
-              </div>
-              <div className="categories-dropdown-grid">
-                {categories.map((cat) => (
+          {/* Dropdown Menu Panel with Framer Motion */}
+          <AnimatePresence>
+            {dropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                className="categories-dropdown-menu"
+                role="menu"
+              >
+                <div className="categories-dropdown-header">
+                  Industrial Hardware Divisions
+                </div>
+                <div className="categories-dropdown-grid">
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat._id}
+                      href={`/category/${cat.slug}`}
+                      className="category-dropdown-item"
+                      role="menuitem"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <span>{cat.name}</span>
+                    </Link>
+                  ))}
+                </div>
+                <div className="categories-dropdown-footer">
                   <Link
-                    key={cat._id}
-                    href={`/category/${cat.slug}`}
-                    className="category-dropdown-item"
-                    role="menuitem"
+                    href="/products"
+                    className="view-all-products-link"
                     onClick={() => setDropdownOpen(false)}
                   >
-                    <span>{cat.name}</span>
+                    <span>View All Catalog Products</span>
+                    <ArrowRight size={14} />
                   </Link>
-                ))}
-              </div>
-              <div className="categories-dropdown-footer">
-                <Link
-                  href="/products"
-                  className="view-all-products-link"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  <span>View All Catalog Products</span>
-                  <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-          )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Navigation Item: Our Story */}

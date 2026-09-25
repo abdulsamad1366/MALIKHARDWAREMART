@@ -11,6 +11,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Layers, Compass } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export interface GridItem {
   _id: string;
@@ -149,82 +150,86 @@ export default function CategoryGrid({
               const imgSrc = getImageSrc(item);
 
               return (
-                <Link
+                <motion.div
                   key={item._id}
-                  href={href}
-                  className="category-circle-item"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textDecoration: 'none',
-                    width: '136px',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    transition: 'transform var(--transition-fast)',
-                  }}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  {/* Circle Image Frame */}
-                  <div
+                  <Link
+                    href={href}
+                    className="category-circle-item"
                     style={{
-                      width: '110px',
-                      height: '110px',
-                      borderRadius: '50%',
-                      background: 'var(--bg-secondary)',
-                      border: '2px solid var(--border-medium)',
-                      padding: '4px',
-                      marginBottom: '12px',
                       display: 'flex',
+                      flexDirection: 'column',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      overflow: 'hidden',
-                      boxShadow: 'var(--shadow-sm)',
-                      transition: 'all 0.25s ease',
+                      textDecoration: 'none',
+                      width: '136px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
                     }}
-                    className="circle-frame"
                   >
+                    {/* Circle Image Frame */}
                     <div
                       style={{
-                        position: 'relative',
-                        width: '100%',
-                        height: '100%',
+                        width: '110px',
+                        height: '110px',
                         borderRadius: '50%',
+                        background: 'var(--bg-secondary)',
+                        border: '2px solid var(--border-medium)',
+                        padding: '4px',
+                        marginBottom: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         overflow: 'hidden',
-                        background: '#FFFFFF',
+                        boxShadow: 'var(--shadow-sm)',
+                        transition: 'all 0.25s ease',
                       }}
+                      className="circle-frame"
                     >
-                      <Image
-                        src={imgSrc}
-                        alt={item.name}
-                        fill
-                        sizes="110px"
+                      <div
                         style={{
-                          objectFit: 'cover',
-                          transition: 'transform 0.3s ease',
+                          position: 'relative',
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          background: '#FFFFFF',
                         }}
-                        className="circle-img"
-                      />
+                      >
+                        <Image
+                          src={imgSrc}
+                          alt={item.name}
+                          fill
+                          sizes="110px"
+                          style={{
+                            objectFit: 'cover',
+                            transition: 'transform 0.3s ease',
+                          }}
+                          className="circle-img"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Label Centered Below */}
-                  <span
-                    style={{
-                      fontSize: '0.86rem',
-                      fontWeight: 700,
-                      color: 'var(--text-main)',
-                      lineHeight: 1.3,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      transition: 'color var(--transition-fast)',
-                    }}
-                    className="circle-label"
-                  >
-                    {item.name}
-                  </span>
-                </Link>
+                    {/* Label Centered Below */}
+                    <span
+                      style={{
+                        fontSize: '0.86rem',
+                        fontWeight: 700,
+                        color: 'var(--text-main)',
+                        lineHeight: 1.3,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        transition: 'color var(--transition-fast)',
+                      }}
+                      className="circle-label"
+                    >
+                      {item.name}
+                    </span>
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
@@ -232,15 +237,12 @@ export default function CategoryGrid({
       </div>
 
       <style jsx>{`
-        .category-circle-item:hover {
-          transform: translateY(-4px);
-        }
         .category-circle-item:hover .circle-frame {
           border-color: var(--color-amber);
           box-shadow: 0 6px 16px rgba(217, 119, 6, 0.2);
         }
         .category-circle-item:hover .circle-img {
-          transform: scale(1.1);
+          transform: scale(1.08);
         }
         .category-circle-item:hover .circle-label {
           color: var(--color-amber);

@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export interface PromoBannerItem {
   _id: string;
@@ -117,25 +118,29 @@ export default function PromoBannerStrip({
           }}
         >
           {slicedBanners.map((banner) => (
-            <Link
+            <motion.div
               key={banner._id}
-              href={banner.linkUrl}
-              className="promo-tile"
-              style={{
-                position: 'relative',
-                height: '180px',
-                borderRadius: 'var(--radius-lg)',
-                overflow: 'hidden',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '24px 28px',
-                boxShadow: 'var(--shadow-sm)',
-                border: '1px solid var(--border-subtle)',
-                background: 'var(--bg-secondary)',
-                transition: 'transform var(--transition-fast), box-shadow var(--transition-fast)',
-              }}
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
+              <Link
+                href={banner.linkUrl}
+                className="promo-tile"
+                style={{
+                  position: 'relative',
+                  height: '180px',
+                  borderRadius: 'var(--radius-lg)',
+                  overflow: 'hidden',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '24px 28px',
+                  boxShadow: 'var(--shadow-sm)',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-secondary)',
+                  transition: 'box-shadow var(--transition-fast), border-color var(--transition-fast)',
+                }}
+              >
               {/* Background Product Image */}
               <div
                 style={{
@@ -235,13 +240,13 @@ export default function PromoBannerStrip({
                 </div>
               </div>
             </Link>
+          </motion.div>
           ))}
         </div>
       </div>
 
       <style jsx>{`
         .promo-tile:hover {
-          transform: translateY(-3px);
           box-shadow: var(--shadow-md);
           border-color: var(--border-medium);
         }
