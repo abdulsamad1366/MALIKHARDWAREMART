@@ -176,7 +176,7 @@ export default function HeroCarousel({ slides: initialSlides }: HeroCarouselProp
       style={{
         position: 'relative',
         width: '100%',
-        height: 'clamp(240px, 32vw, 480px)',
+        height: 'clamp(380px, 50vw, 680px)',
         background: '#0F172A',
         overflow: 'hidden',
         display: 'flex',
