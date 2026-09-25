@@ -18,6 +18,8 @@ import {
   Store,
   ShieldAlert,
   ArrowLeft,
+  Sliders,
+  BookOpen,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -114,6 +116,22 @@ export default function AdminLayout({
           >
             <ShieldAlert size={18} />
             <span>Customer Approvals</span>
+          </Link>
+
+          <Link
+            href="/admin/settings"
+            className={`admin-nav-item ${pathname === '/admin/settings' ? 'active' : ''}`}
+          >
+            <Sliders size={18} />
+            <span>Site Settings</span>
+          </Link>
+
+          <Link
+            href="/admin/blog"
+            className={`admin-nav-item ${pathname === '/admin/blog' ? 'active' : ''}`}
+          >
+            <BookOpen size={18} />
+            <span>Blog & Guides</span>
           </Link>
         </nav>
 

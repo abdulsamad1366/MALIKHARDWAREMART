@@ -282,6 +282,119 @@ async function runTestSuite() {
   const updateOrderData = await updateOrderRes.json();
   assert(updateOrderData.order.status === 'confirmed', 'Admin updated order status from pending to confirmed');
 
+  // TEST 10: Public Site Settings (Marquee Message)
+  console.log('\n--- TEST 10: Public Site Settings (Marquee Message) ---');
+  const settingsRes = await fetch(`${BASE_URL}/api/settings`);
+  const settingsData = await settingsRes.json();
+  assert(settingsRes.status === 200, 'Public settings returns 200 OK');
+  assert('marqueeMessage' in settingsData.settings, 'Settings payload contains marqueeMessage field');
+  assert(settingsData.settings.marqueeMessage.length > 0, 'Seeded marquee message is active');
+
+  // TEST 11: Admin Settings Access Control & Mutation
+  console.log('\n--- TEST 11: Admin Settings Access Control & Mutation ---');
+  // Unauthenticated attempt should fail with 403
+  const guestSettingsPut = await fetch(`${BASE_URL}/api/admin/settings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ marqueeMessage: 'Hacked marquee' }),
+  });
+  assert(guestSettingsPut.status === 403, 'Guest cannot edit site settings (403 Forbidden)');
+
+  // Customer attempt should fail with 403
+  const customerSettingsPut = await fetch(`${BASE_URL}/api/admin/settings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Cookie: customerCookie },
+    body: JSON.stringify({ marqueeMessage: 'Customer attempt' }),
+  });
+  assert(customerSettingsPut.status === 403, 'Verified customer cannot edit site settings (403 Forbidden)');
+
+  // Admin update should succeed
+  const testNewMarquee = '⚡ Special Site Notice: Test verification run active. All systems operational.';
+  const adminSettingsPut = await fetch(`${BASE_URL}/api/admin/settings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({ marqueeMessage: testNewMarquee }),
+  });
+  const adminSettingsData = await adminSettingsPut.json();
+  assert(adminSettingsPut.status === 200, 'Admin can update marquee message (200 OK)');
+  assert(adminSettingsData.settings.marqueeMessage === testNewMarquee, 'Marquee message correctly saved');
+
+  // Verify public endpoint reflects the update
+  const verifySettingsRes = await fetch(`${BASE_URL}/api/settings`);
+  const verifySettingsData = await verifySettingsRes.json();
+  assert(verifySettingsData.settings.marqueeMessage === testNewMarquee, 'Public GET /api/settings immediately reflects admin update');
+
+  // TEST 12: Public Blog API & Single Post View
+  console.log('\n--- TEST 12: Public Blog API & Single Post View ---');
+  const blogRes = await fetch(`${BASE_URL}/api/blog`);
+  const blogData = await blogRes.json();
+  assert(blogRes.status === 200, 'Public blog index returns 200 OK');
+  assert(Array.isArray(blogData.posts) && blogData.posts.length >= 4, 'All seeded published blog articles returned');
+
+  // Check single post
+  const singleSlug = blogData.posts[0].slug;
+  const singleBlogRes = await fetch(`${BASE_URL}/api/blog/${singleSlug}`);
+  const singleBlogData = await singleBlogRes.json();
+  assert(singleBlogRes.status === 200, `Public single post /api/blog/${singleSlug} returns 200 OK`);
+  assert(singleBlogData.post.slug === singleSlug, 'Returned post matches requested slug');
+  assert(singleBlogData.post.content && singleBlogData.post.content.length > 50, 'Post contains full article content');
+
+  // Non-existent slug returns 404
+  const nonExistentBlogRes = await fetch(`${BASE_URL}/api/blog/non-existent-article-slug`);
+  assert(nonExistentBlogRes.status === 404, 'Non-existent blog slug returns 404 Not Found');
+
+  // TEST 13: Admin Blog Management (CRUD)
+  console.log('\n--- TEST 13: Admin Blog Management (CRUD) ---');
+  // Admin list posts
+  const adminBlogRes = await fetch(`${BASE_URL}/api/admin/blog`, {
+    headers: { Cookie: adminCookie },
+  });
+  const adminBlogData = await adminBlogRes.json();
+  assert(adminBlogRes.status === 200, 'Admin can list all blog posts');
+
+  // Admin create draft post
+  const newArticleRes = await fetch(`${BASE_URL}/api/admin/blog`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({
+      title: 'Draft Article for Test Suite',
+      slug: 'draft-article-test-suite',
+      excerpt: 'This is a test draft article that should not be visible to guests.',
+      content: 'Detailed internal engineering notes on pipeline stress calculations.',
+      authorName: 'Test Engineer',
+      isPublished: false,
+    }),
+  });
+  const newArticleData = await newArticleRes.json();
+  assert(newArticleRes.status === 201, 'Admin can author a new blog post (201 Created)');
+
+  // Verify draft is NOT visible to public
+  const publicDraftCheck = await fetch(`${BASE_URL}/api/blog/draft-article-test-suite`);
+  assert(publicDraftCheck.status === 404, 'Draft article is hidden from public /api/blog/[slug] (404 Not Found)');
+
+  // Clean up test article
+  const deleteArticleRes = await fetch(`${BASE_URL}/api/admin/blog/${newArticleData.post._id}`, {
+    method: 'DELETE',
+    headers: { Cookie: adminCookie },
+  });
+  assert(deleteArticleRes.status === 200, 'Admin can delete blog post (200 OK)');
+
+  // TEST 14: Contact Form Submission (B2B Trade RFQ)
+  console.log('\n--- TEST 14: Contact Form Submission ---');
+  const contactRes = await fetch(`${BASE_URL}/api/contact`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Delhi Metro Contractor Corp',
+      email: 'procurement@delhimetrocontractor.com',
+      phone: '+91 99887 76655',
+      message: 'Requesting formal quotation for 5,000 pcs M16 Grade 10.9 structural bolts and 200 cans Fischer pure epoxy.',
+    }),
+  });
+  const contactData = await contactRes.json();
+  assert(contactRes.status === 200, 'Trade contact inquiry submitted successfully (200 OK)');
+  assert(contactData.success === true, 'Contact endpoint returns success: true');
+
   // Summary
   console.log('\n====================================================');
   console.log(`TEST SUITE RESULTS: ${passed} PASSED, ${failed} FAILED`);

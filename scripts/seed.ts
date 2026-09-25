@@ -11,6 +11,8 @@ import Product from '../src/models/Product';
 import User from '../src/models/User';
 import Cart from '../src/models/Cart';
 import Order from '../src/models/Order';
+import SiteSettings from '../src/models/SiteSettings';
+import BlogPost from '../src/models/BlogPost';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/malik_hardware_mart';
 
@@ -30,6 +32,8 @@ async function seedDatabase(): Promise<void> {
   await User.deleteMany({});
   await Cart.deleteMany({});
   await Order.deleteMany({});
+  await SiteSettings.deleteMany({});
+  await BlogPost.deleteMany({});
 
   // 1. Seed Categories with local placeholder image fallbacks per Section 5
   console.log('Seeding categories...');
@@ -514,6 +518,124 @@ async function seedDatabase(): Promise<void> {
     paymentStatus: 'completed',
     notes: 'Sample historical delivered order for testing',
   });
+
+  // 6. Seed SiteSettings (Single document for global storefront marquee)
+  console.log('Seeding site settings...');
+  await SiteSettings.create({
+    marqueeMessage: '⚡ Wholesale Dispatch Alert: Direct factory shipments active across Delhi-NCR & Northern India. GST Input Tax Credit (ITC) invoices issued with every consignment. Contact Trade Desk: +91 98765 43210.',
+    updatedBy: adminUser._id,
+  });
+
+  // 7. Seed Technical Blog Posts & Contractor Guides
+  console.log('Seeding blog posts and technical guides...');
+  await BlogPost.create([
+    {
+      title: 'High-Tensile Fastener Grading: 8.8 vs 10.9 in Structural Steel Fabrication',
+      slug: 'fastener-grades-8-8-vs-10-9',
+      excerpt: 'Understand yield strength, proof load, and torque tension thresholds when specifying Grade 8.8 and 10.9 bolts for industrial pre-engineered steel buildings.',
+      content: `When designing bolted joints for structural steel, heavy machinery bases, or pre-engineered buildings (PEBs), selecting the correct bolt grade is critical to prevent joint slippage or catastrophic shear failure.
+
+1. Understanding Property Classes
+The metric property class designation consists of two numbers separated by a dot:
+- The first number is 1/100th of the nominal minimum tensile strength in MPa.
+- The second number represents 10 times the ratio between the lower yield stress and the nominal tensile strength.
+
+For Grade 8.8:
+- Minimum Tensile Strength: 800 MPa (N/mm²)
+- Yield Strength: 640 MPa (80% of tensile strength)
+- Material: Medium carbon steel, quenched and tempered.
+
+For Grade 10.9:
+- Minimum Tensile Strength: 1000 MPa (N/mm²)
+- Yield Strength: 900 MPa (90% of tensile strength)
+- Material: Low carbon martensitic or alloy steel (boron or chromium-molybdenum), quenched and tempered.
+
+2. When to Specify Grade 8.8
+Grade 8.8 represents the standard structural fastener across Indian industrial construction (IS 1367 / ISO 898-1). It provides excellent ductility, resistance to fatigue under moderate cyclic loading, and reliable performance in standard beams, purlins, and gantry rails.
+
+3. When to Upgrade to Grade 10.9
+Grade 10.9 is mandatory where high clamping loads are required to prevent slip in friction-grip joints, such as heavy crane runway beams, telecommunication towers subjected to extreme wind shear, and vibratory machine foundations.
+
+At Malik Hardware Mart, all high-tensile fasteners are dispatched with manufacturer 3.1 Mill Test Certificates verifying chemical composition, heat treatment batch, and proof load test results.`,
+      coverImage: '/images/products/category-fasteners.png',
+      authorName: 'Er. Arvind Malik, Technical Consultant',
+      isPublished: true,
+      publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    },
+    {
+      title: 'Bosch SDS-Plus vs SDS-Max: Selecting the Right Rotary Hammer for Commercial Sites',
+      slug: 'bosch-sds-hammer-vs-demolition-breaker-guide',
+      excerpt: 'A practical breakdown of impact energy, core drilling capacity, and chuck mechanisms for electrical, plumbing, and structural concrete drilling contractors.',
+      content: `Choosing between Bosch's professional SDS-Plus and SDS-Max rotary hammer platforms directly impacts drilling speed, operator fatigue, and tool longevity on commercial construction sites.
+
+1. SDS-Plus: Precision & High Speed Drilling (Up to 26-28mm)
+The SDS-Plus chuck features a 10mm diameter shank with two open grooves and two closed ball recesses. It is engineered for lightweight to medium masonry drilling.
+- Typical Impact Energy: 1.7J to 3.2J
+- Weight Range: 2.3 kg to 3.5 kg
+- Optimal Applications: Rebar dowelling (M8 to M16), anchor hole drilling for electrical conduit brackets, drop-in anchor installations, and false ceiling hanger fixings.
+- Top Model: Bosch GBH 2-26 DRE — the quintessential workhorse of electrical and HVAC installation contractors in India.
+
+2. SDS-Max: Heavy Demolition & Large Bore Core Drilling (Over 28mm to 52mm)
+The SDS-Max shank has an 18mm diameter with three open grooves and locking segments, delivering massive rotational torque and impact power.
+- Typical Impact Energy: 8.5J to 19J
+- Weight Range: 6.8 kg to 12 kg
+- Optimal Applications: Core drilling for large PVC soil pipes through RCC slabs, heavy through-wall penetrations, chiseling structural column beams, and foundation trench demolition.
+- Top Model: Bosch GBH 8-45 D or GBH 12-52 DV with Vibration Control.
+
+3. Maintenance Best Practice for Site Supervisors
+Always apply high-temperature molybdenum grease to the tool shank before insertion into the chuck. Running dry SDS chucks accelerates shank wear by 300% and can weld bits into the chuck sleeve under heavy continuous thermal load.`,
+      coverImage: '/images/products/category-tools.png',
+      authorName: 'Mohit Rawat, Tool Specialist',
+      isPublished: true,
+      publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+    {
+      title: 'Chemical vs Mechanical Anchoring in Cracked Concrete: A Contractor’s Field Checklist',
+      slug: 'chemical-vs-mechanical-anchors-concrete-checklist',
+      excerpt: 'Compare pure epoxy resin systems with wedge anchors for heavy base plate installations, seismic qualifications, and curing time constraints.',
+      content: `Anchoring structural steel columns or heavy industrial machinery into reinforced concrete demands an understanding of base material cracking, edge distances, and loading dynamics.
+
+1. Mechanical Wedge Anchors (Expansion Anchors)
+Mechanical anchors rely on mechanical interlock and friction generated by an expansion clip pushed against the drilled hole walls.
+- Pros: Immediate load-bearing capacity; no curing time required; unaffected by cold temperatures during installation.
+- Cons: Induces significant radial expansion stress in concrete, requiring large edge distances (typically 10x anchor diameter) and minimum center-to-center spacing; performance degrades significantly in tension zones where micro-cracks form.
+
+2. Chemical Injection Anchors (Vinylester & Pure Epoxy)
+Chemical injection anchors bond a threaded rod or rebar into the substrate using synthetic resins, distributing the load uniformly along the entire embedment depth without expansion stresses.
+- Pros: Stress-free anchorage allows very close edge distances and tight spacings; exceptional seismic and shock resistance; water-tight sealing prevents corrosion of embedded steel.
+- Cons: Requires strict hole cleaning (blow-brush-blow cycle); curing time is temperature-dependent (e.g. 45-60 mins at 30°C for Vinylester, 8-12 hours for Pure Epoxy).
+
+3. The Golden Rule of Chemical Anchoring
+90% of chemical anchor pull-out failures occur due to improper hole cleaning. Dust left on the hole walls acts as a release agent between the resin and concrete matrix. Always use an oil-free compressed air lance followed by a stiff steel wire brush.`,
+      coverImage: '/images/products/category-fasteners.png',
+      authorName: 'Er. Arvind Malik, Technical Consultant',
+      isPublished: true,
+      publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
+    },
+    {
+      title: 'Maximizing GST Input Tax Credit (ITC) on Bulk Construction Hardware Consignments',
+      slug: 'maximizing-gst-itc-construction-hardware',
+      excerpt: 'Tax compliance roadmap for civil contractors and builders to ensure complete GSTR-2B matching, E-way bill compliance, and zero ITC leakage.',
+      content: `For registered contractors and builders in India, hardware and steel procurement represents 25-40% of project expenditures. Ensuring 100% eligibility and reconciliation of GST Input Tax Credit (ITC) directly impacts cash flow and operational margins.
+
+1. Mandatory Fields on B2B Hardware Tax Invoices
+Under Section 31 of the CGST Act, a valid B2B tax invoice must contain:
+- Complete legal name and 15-digit GSTIN of supplier and recipient.
+- Proper 4-digit or 6-digit HSN code (e.g., 7318 for Screws, Bolts & Nuts; 8467 for Hand-held Power Tools).
+- Serialized invoice number unique for each financial year.
+- Clear itemized bifurcation of CGST & SGST (for intra-state Delhi supplies) or IGST (for inter-state shipments).
+
+2. Real-Time E-Way Bill Integration
+Any consignment exceeding ₹50,000 in invoice value requires a Part A and Part B generated E-Way Bill before dispatch from the warehouse. Malik Hardware Mart operates automated ERP integration ensuring E-Way bills accompany every commercial dispatch vehicle.
+
+3. Reconciliation with GSTR-2B
+To claim full ITC under Section 16(2)(aa), the supplier must file their GSTR-1 on or before the 11th of the succeeding month, populating the recipient’s GSTR-2B. At Malik Hardware Mart, all B2B trade sales are uploaded via automated API reconciliation, ensuring 0% ITC blockages for our institutional and contractor clients.`,
+      coverImage: '/images/products/category-building.png',
+      authorName: 'Sanjay Malik, Accounts Director',
+      isPublished: true,
+      publishedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000),
+    },
+  ]);
 
   console.log('Database seeded successfully!');
   console.log('--------------------------------------------------');
