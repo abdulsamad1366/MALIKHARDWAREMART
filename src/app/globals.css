@@ -1189,13 +1189,10 @@ input, select, textarea {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* Part 1: Marquee Banner - Vibrant Red Engineered Finish */
+/* Part 1: Marquee Banner - Vibrant Red Velisqa Style */
 .marquee-band {
-  background: linear-gradient(90deg, #991B1B 0%, #B91C1C 20%, #DC2626 50%, #B91C1C 80%, #991B1B 100%);
+  background: linear-gradient(90deg, #991B1B 0%, #B91C1C 25%, #DC2626 50%, #B91C1C 75%, #991B1B 100%);
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  padding: 8px 0;
-  font-size: 0.8rem;
-  color: #FFFFFF;
   overflow: hidden;
   width: 100%;
   position: relative;
@@ -1203,7 +1200,7 @@ input, select, textarea {
   user-select: none;
 }
 
-/* Subtle top highlight sheen line */
+/* Subtle top sheen line */
 .marquee-band::before {
   content: '';
   position: absolute;
@@ -1213,29 +1210,57 @@ input, select, textarea {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35) 50%, transparent);
   pointer-events: none;
+  z-index: 10;
 }
 
-/* Edge Fade Mask for smooth entry & exit */
-.marquee-scroll-window {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
+/* Velisqa Exact Marquee Viewport & Track Engine */
+.promo-marquee-viewport {
+  min-width: 100%;
+  max-width: 100%;
+  height: 2.25rem;
   position: relative;
-  display: flex;
-  mask-image: linear-gradient(to right, transparent, black 48px, black calc(100% - 48px), transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 48px, black calc(100% - 48px), transparent);
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
 }
 
-.marquee-track {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  animation: marquee-scroll var(--marquee-speed, 70s) linear infinite;
+.promo-marquee-track {
   will-change: transform;
+  width: 200%;
+  display: flex;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
 }
 
-.marquee-track:hover {
+.promo-marquee-track > span {
+  flex: 0 0 50%;
+  align-items: center;
+  display: inline-flex;
+}
+
+.promo-marquee-animate {
+  animation: 34s linear infinite promo-marquee-scroll;
+}
+
+.promo-marquee-animate:hover {
   animation-play-state: paused;
+}
+
+@keyframes promo-marquee-scroll {
+  0% {
+    transform: translateY(-50%) translate(0);
+  }
+  to {
+    transform: translateY(-50%) translate(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-marquee-animate {
+    animation: none !important;
+  }
 }
 
 .marquee-item {
