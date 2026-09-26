@@ -18,7 +18,7 @@ import NavBottom from '@/components/NavBottom';
  */
 export default function Header() {
   return (
-    <header className="site-header-root">
+    <header className="site-header-root sticky top-0 z-50 w-full">
       {/* Part 1: Top Marquee Notice Band */}
       <MarqueeBar />
 
