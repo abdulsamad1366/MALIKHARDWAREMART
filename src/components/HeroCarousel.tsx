@@ -169,7 +169,7 @@ export default function HeroCarousel({ slides: initialSlides }: HeroCarouselProp
             ref={(el) => {
               slideRefs.current[idx] = el;
             }}
-            className={`absolute inset-0 transition-opacity duration-700 ease-out z-[1] ${
+            className={`absolute inset-0 transition-opacity duration-700 ease-out z-1 ${
               isCurrent ? 'opacity-100 visible' : 'opacity-0 invisible'
             }`}
           >

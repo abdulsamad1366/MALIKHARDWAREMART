@@ -131,10 +131,10 @@ export default function PromoBannerStrip({
             >
               <Link
                 href={banner.linkUrl}
-                className="group relative w-full h-[180px] rounded-2xl overflow-hidden bg-[#F5F5F7] hover:bg-white border border-slate-200/80 hover:border-red-500/40 p-6 flex items-center shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                className="group relative w-full h-45 rounded-2xl overflow-hidden bg-apple-subtle hover:bg-white border border-slate-200/80 hover:border-red-500/40 p-6 flex items-center shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
                 {/* Background Product Illustration */}
-                <div className="absolute right-0 bottom-0 w-36 h-36 opacity-85 z-[1] group-hover:scale-108 transition-transform duration-500 ease-out pointer-events-none">
+                <div className="absolute right-0 bottom-0 w-36 h-36 opacity-85 z-1 group-hover:scale-108 transition-transform duration-500 ease-out pointer-events-none">
                   <Image
                     src={banner.image || '/images/products/default-product.png'}
                     alt={banner.title}
@@ -145,10 +145,10 @@ export default function PromoBannerStrip({
                 </div>
 
                 {/* Soft gradient mask for clean typography */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#F5F5F7] via-[#F5F5F7]/90 to-transparent group-hover:from-white group-hover:via-white/90 z-[2] transition-colors duration-300 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-r from-apple-subtle via-apple-subtle/90 to-transparent group-hover:from-white group-hover:via-white/90 z-2 transition-colors duration-300 pointer-events-none" />
 
                 {/* Text & Callout */}
-                <div className="relative z-[3] max-w-[65%]">
+                <div className="relative z-3 max-w-[65%]">
                   {banner.badge && (
                     <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200/70 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider mb-2">
                       <Sparkles size={10} />

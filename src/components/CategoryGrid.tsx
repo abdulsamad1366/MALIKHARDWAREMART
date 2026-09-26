@@ -129,7 +129,7 @@ export default function CategoryGrid({
                     aria-label={`Explore ${item.name}`}
                   >
                     {/* Media frame */}
-                    <div className="relative w-full aspect-[16/11] rounded-xl overflow-hidden bg-slate-900 shadow-inner">
+                    <div className="relative w-full aspect-16/11 rounded-xl overflow-hidden bg-slate-900 shadow-inner">
                       <Image
                         src={imgSrc}
                         alt={item.name}
@@ -137,7 +137,7 @@ export default function CategoryGrid({
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
                         className="object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                     </div>
 
                     {/* Content */}

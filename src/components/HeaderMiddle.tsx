@@ -57,8 +57,8 @@ export default function HeaderMiddle() {
   };
 
   return (
-    <div className="w-full bg-white/95 backdrop-blur-md border-b border-black/[0.06] transition-colors duration-200">
-      <div className="container mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between gap-4 md:gap-8">
+    <div className="w-full bg-white/95 backdrop-blur-md border-b border-black/6 transition-colors duration-200">
+      <div className="container mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-4 md:gap-8">
         
         {/* Column 1: Brand Wordmark Logo */}
         <Link
@@ -93,7 +93,7 @@ export default function HeaderMiddle() {
             />
             <input
               type="text"
-              className="w-full h-11 pl-11 pr-4 bg-[#F5F5F7] hover:bg-[#EBEBEF] focus:bg-white text-slate-900 placeholder:text-slate-500 text-sm font-medium rounded-full border border-transparent focus:border-red-500/30 focus:ring-4 focus:ring-red-500/10 outline-none transition-all duration-200"
+              className="w-full h-11 pl-11 pr-4 bg-apple-subtle hover:bg-[#EBEBEF] focus:bg-white text-slate-900 placeholder:text-slate-500 text-sm font-medium rounded-full border border-transparent focus:border-red-500/30 focus:ring-4 focus:ring-red-500/10 outline-none transition-all duration-200"
               placeholder="Search fasteners, power tools, electricals, CPVC pipes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -148,14 +148,14 @@ export default function HeaderMiddle() {
               transition={{ duration: 0.15 }}
               className="relative"
             >
-              <ShoppingCart size={20} className="stroke-[2]" />
+              <ShoppingCart size={20} className="stroke-2" />
               {itemCount > 0 && (
                 <motion.span
                   key={itemCount}
                   initial={{ scale: 0.4, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                  className="absolute -top-2 -right-2.5 min-w-[18px] h-[18px] px-1 bg-red-600 text-white text-[11px] font-extrabold flex items-center justify-center rounded-full shadow-sm shadow-red-600/30"
+                  className="absolute -top-2 -right-2.5 min-w-4.5 h-4.5 px-1 bg-red-600 text-white text-[11px] font-extrabold flex items-center justify-center rounded-full shadow-sm shadow-red-600/30"
                   aria-label={`${itemCount} items in cart`}
                 >
                   {itemCount}
@@ -176,7 +176,7 @@ export default function HeaderMiddle() {
               <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shadow-sm">
                 {getUserInitials(user.name)}
               </div>
-              <span className="hidden lg:inline text-xs font-semibold max-w-[80px] truncate">
+              <span className="hidden lg:inline text-xs font-semibold max-w-20 truncate">
                 {user.name.split(' ')[0]}
               </span>
             </Link>
@@ -200,7 +200,7 @@ export default function HeaderMiddle() {
           animate={{ height: 'auto', opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="md:hidden border-t border-slate-100 bg-[#F5F5F7] px-4 py-3"
+          className="md:hidden border-t border-slate-100 bg-apple-subtle px-4 py-3"
         >
           <form onSubmit={handleSearch} className="flex gap-2">
             <input

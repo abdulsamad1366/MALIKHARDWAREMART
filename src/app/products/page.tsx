@@ -174,7 +174,7 @@ function CatalogContent() {
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-50 border border-emerald-200/80 rounded-2xl text-xs font-bold text-emerald-800">
-                <Check size={16} className="text-emerald-600 stroke-[3]" />
+                <Check size={16} className="text-emerald-600 stroke-3" />
                 <span>Trade Pricing & Add-to-Cart Unlocked</span>
               </div>
             )}
@@ -182,9 +182,9 @@ function CatalogContent() {
         </div>
 
         {/* Filter Controls Toolbar */}
-        <div className="bg-[#F5F5F7] border border-slate-200/80 rounded-2xl p-4 mb-8 flex flex-wrap gap-3 items-center justify-between shadow-sm">
+        <div className="bg-apple-subtle border border-slate-200/80 rounded-2xl p-4 mb-8 flex flex-wrap gap-3 items-center justify-between shadow-sm">
           {/* Search Box */}
-          <div className="relative flex-1 min-w-[240px]">
+          <div className="relative flex-1 min-w-60">
             <Search
               size={17}
               className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
@@ -202,7 +202,7 @@ function CatalogContent() {
           </div>
 
           {/* Category Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[200px]">
+          <div className="w-full sm:w-auto sm:min-w-50">
             <select
               className="w-full h-11 px-4 bg-white rounded-xl text-sm font-medium text-slate-800 border border-slate-200/80 focus:outline-none focus:border-red-500"
               value={selectedCategory}
@@ -221,7 +221,7 @@ function CatalogContent() {
           </div>
 
           {/* Brand Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[180px]">
+          <div className="w-full sm:w-auto sm:min-w-45">
             <select
               className="w-full h-11 px-4 bg-white rounded-xl text-sm font-medium text-slate-800 border border-slate-200/80 focus:outline-none focus:border-red-500"
               value={selectedBrand}
@@ -264,7 +264,7 @@ function CatalogContent() {
             Loading catalog specifications...
           </div>
         ) : products.length === 0 ? (
-          <div className="text-center py-16 px-4 bg-[#F5F5F7] rounded-3xl border border-dashed border-slate-300 max-w-lg mx-auto">
+          <div className="text-center py-16 px-4 bg-apple-subtle rounded-3xl border border-dashed border-slate-300 max-w-lg mx-auto">
             <Filter size={36} className="text-slate-400 mx-auto mb-3" />
             <h3 className="text-base font-bold text-slate-800 mb-1">No products match your criteria</h3>
             <p className="text-xs text-slate-500 mb-4">

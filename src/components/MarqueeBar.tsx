@@ -97,7 +97,7 @@ export default function MarqueeBar({ initialMessage = '' }: MarqueeBarProps) {
 
   return (
     <div
-      className="marquee-band relative flex h-9 w-full items-center overflow-hidden bg-gradient-to-r from-red-800 via-red-600 to-red-800 border-b border-red-700/50 shadow-sm"
+      className="marquee-band relative flex h-9 w-full items-center overflow-hidden bg-linear-to-r from-red-800 via-red-600 to-red-800 border-b border-red-700/50 shadow-sm"
       role="region"
       aria-label="Store highlights"
     >

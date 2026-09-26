@@ -11,7 +11,7 @@ import { Wrench, Phone, Mail, MapPin, ShieldCheck, Truck, CreditCard, Award } fr
 
 export default function Footer() {
   return (
-    <footer className="bg-[#F5F5F7] border-t border-slate-200/80 pt-12 pb-8 text-slate-600">
+    <footer className="bg-apple-subtle border-t border-slate-200/80 pt-12 pb-8 text-slate-600">
       <div className="container mx-auto px-4 sm:px-6">
         
         {/* Value Proposition Highlights */}

@@ -96,7 +96,7 @@ export default function NavBottom() {
   ];
 
   return (
-    <nav className="w-full bg-white/95 backdrop-blur-md border-b border-black/[0.05]" aria-label="Main Navigation">
+    <nav className="w-full bg-white/95 backdrop-blur-md border-b border-black/5" aria-label="Main Navigation">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-center gap-1 sm:gap-2 py-2 overflow-x-auto no-scrollbar">
           
@@ -151,7 +151,7 @@ export default function NavBottom() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
                   transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 w-[300px] sm:w-[340px] bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-2xl rounded-2xl p-2.5 z-[1100]"
+                  className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 w-75 sm:w-85 bg-white/95 backdrop-blur-2xl border border-black/8 shadow-2xl rounded-2xl p-2.5 z-1100"
                   role="menu"
                 >
                   <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">

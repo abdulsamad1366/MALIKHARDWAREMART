@@ -163,7 +163,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6">
           {/* Trust badges row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16">
-            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-apple-subtle border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
               <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <Truck size={20} />
               </div>
@@ -177,7 +177,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-apple-subtle border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
               <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <FileText size={20} />
               </div>
@@ -191,7 +191,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-apple-subtle border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
               <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <Award size={20} />
               </div>
@@ -205,7 +205,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-apple-subtle border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
               <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <Building2 size={20} />
               </div>

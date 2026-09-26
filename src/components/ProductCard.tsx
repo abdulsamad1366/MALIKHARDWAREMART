@@ -113,7 +113,7 @@ export default function ProductCard({
     >
       <div>
         {/* Product Image Frame */}
-        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#F5F5F7] p-3 flex items-center justify-center">
+        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-apple-subtle p-3 flex items-center justify-center">
           <Link href={`/products/${slug}`} className="w-full h-full flex items-center justify-center">
             <img
               src={resolvedImageUrl}
@@ -134,7 +134,7 @@ export default function ProductCard({
             {brand}
           </span>
 
-          <h3 className="mt-1 text-sm font-bold text-slate-900 group-hover:text-red-600 line-clamp-2 leading-snug transition-colors duration-200 min-h-[40px]">
+          <h3 className="mt-1 text-sm font-bold text-slate-900 group-hover:text-red-600 line-clamp-2 leading-snug transition-colors duration-200 min-h-10">
             <Link href={`/products/${slug}`} title={name}>
               {name}
             </Link>
@@ -146,7 +146,7 @@ export default function ProductCard({
               {specs.slice(0, 2).map((sp, idx) => (
                 <div key={idx} className="flex justify-between items-center">
                   <span className="text-slate-400">{sp.key}:</span>
-                  <span className="font-semibold text-slate-700 truncate max-w-[120px]">{sp.value}</span>
+                  <span className="font-semibold text-slate-700 truncate max-w-30">{sp.value}</span>
                 </div>
               ))}
             </div>
@@ -179,7 +179,7 @@ export default function ProductCard({
                   animate={{ scale: 1 }}
                   className="inline-flex items-center gap-1 text-emerald-400"
                 >
-                  <Check size={14} className="stroke-[3]" />
+                  <Check size={14} className="stroke-3" />
                   <span>Added to Cart</span>
                 </motion.span>
               ) : (
@@ -201,7 +201,7 @@ export default function ProductCard({
           </div>
         ) : (
           // Guest state: Price locked; redirect on click to Login per Section 2 & 4.1
-          <div className="flex items-center justify-between gap-2 p-2 bg-[#F5F5F7] rounded-xl border border-slate-200/60">
+          <div className="flex items-center justify-between gap-2 p-2 bg-apple-subtle rounded-xl border border-slate-200/60">
             <div className="flex flex-col">
               <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-800">
                 <Lock size={12} className="text-amber-600" />
