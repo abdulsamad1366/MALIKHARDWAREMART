@@ -84,13 +84,13 @@ export default function HomePage() {
       {/* 1. Full-Width Edge-To-Edge Hero Carousel */}
       <HeroCarousel />
 
-      {/* 2. "Shop by Category" Circular Grid */}
+      {/* 2. "Shop by Category" Cards Grid */}
       <CategoryGrid source="category" />
 
       {/* 3. Promo Banner Strip (Row 1: Banners 0-2) */}
       <PromoBannerStrip startIndex={0} limit={3} />
 
-      {/* 4. "Shop by Use" Circular Grid */}
+      {/* 4. "Shop by Use" Cards Grid */}
       <CategoryGrid source="useCase" />
 
       {/* 5. Promo Banner Strip (Row 2: Banners 3-5) */}
