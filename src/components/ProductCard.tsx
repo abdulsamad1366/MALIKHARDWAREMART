@@ -2,7 +2,8 @@
 
 /**
  * @file ProductCard.tsx
- * @description Catalog product card with Section 5 image fallback and Section 7 price gating.
+ * @description Catalog product card with Apple & Google design system, Tailwind CSS, and Framer Motion.
+ * Supports Section 5 image fallbacks and Section 7 B2B price gating.
  * When guest: renders locked pricing indicator with CTA redirecting to /login?redirect=...
  * When authenticated: renders wholesale trade price and instant Add to Cart action.
  */
@@ -13,15 +14,13 @@ import { Lock, ShoppingCart, Check, ArrowRight, Clock } from 'lucide-react';
 import { getProductImageUrl, handleImageError } from '@/lib/imageFallback';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 export interface ProductCardProps {
   id: string;
   name: string;
   slug: string;
   brand: string;
-  // PRICE GATE: do not send price to unauthenticated requests
-  // Server-side stripped on unauthenticated requests; will be undefined for guests
   price?: number;
   imageUrl?: string | null;
   stockStatus: 'in_stock' | 'out_of_stock' | 'on_request';
@@ -33,9 +32,6 @@ export interface ProductCardProps {
   specs?: Array<{ key: string; value: string }>;
 }
 
-/**
- * ProductCard component for catalog and category grids.
- */
 export default function ProductCard({
   id,
   name,
@@ -49,6 +45,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const { isAuthenticated, isPriceVerified } = useAuth();
   const { addToCart } = useCart();
+  const shouldReduceMotion = useReducedMotion();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
@@ -78,162 +75,150 @@ export default function ProductCard({
     }
   };
 
-  // Stock status pill styling helper
-  const getStockClass = (status: string) => {
-    switch (status) {
+  // Stock status styling helper
+  const getStockBadge = () => {
+    switch (stockStatus) {
       case 'in_stock':
-        return 'product-badge-stock stock-in';
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+            In Stock
+          </span>
+        );
       case 'out_of_stock':
-        return 'product-badge-stock stock-out';
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200/80">
+            Out of Stock
+          </span>
+        );
       case 'on_request':
-        return 'product-badge-stock stock-request';
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80">
+            On Request
+          </span>
+        );
       default:
-        return 'product-badge-stock stock-in';
-    }
-  };
-
-  const getStockLabel = (status: string) => {
-    switch (status) {
-      case 'in_stock':
-        return 'In Stock';
-      case 'out_of_stock':
-        return 'Out of Stock';
-      case 'on_request':
-        return 'On Request';
-      default:
-        return 'In Stock';
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+            In Stock
+          </span>
+        );
     }
   };
 
   return (
     <motion.div
-      whileHover={{ y: -3 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="product-card"
+      whileHover={shouldReduceMotion ? undefined : { y: -4 }}
+      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex flex-col justify-between bg-white border border-slate-200/80 hover:border-red-500/40 rounded-2xl p-3 sm:p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
     >
-      {/* Product Image with Fallback */}
-      <div className="product-card-image-wrap">
-        <Link href={`/products/${slug}`}>
-          <img
-            src={resolvedImageUrl}
-            alt={name}
-            className="product-card-image"
-            onError={handleImageError}
-            loading="lazy"
-          />
-        </Link>
-        <span className={getStockClass(stockStatus)}>
-          {getStockLabel(stockStatus)}
-        </span>
-      </div>
-
-      {/* Card Content Body */}
-      <div className="product-card-content">
-        <span className="product-brand">{brand}</span>
-
-        <h3 className="product-title">
-          <Link href={`/products/${slug}`} title={name}>
-            {name}
+      <div>
+        {/* Product Image Frame */}
+        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#F5F5F7] p-3 flex items-center justify-center">
+          <Link href={`/products/${slug}`} className="w-full h-full flex items-center justify-center">
+            <img
+              src={resolvedImageUrl}
+              alt={name}
+              className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
+              onError={handleImageError}
+              loading="lazy"
+            />
           </Link>
-        </h3>
-
-        {/* Short Specs Preview (Top 2 attributes) */}
-        {specs && specs.length > 0 && (
-          <div className="product-specs-preview">
-            {specs.slice(0, 2).map((sp, idx) => (
-              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>{sp.key}:</span>
-                <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{sp.value}</span>
-              </div>
-            ))}
+          <div className="absolute top-2 left-2 z-10">
+            {getStockBadge()}
           </div>
-        )}
+        </div>
 
-        {/* Card Footer with Price Gate */}
-        <div className="product-card-footer">
-          {/* PRICE GATE: do not send price to unauthenticated requests */}
-          {isAuthenticated && typeof price === 'number' ? (
-            // Logged-in & Verified: Reveal price & Add to Cart button with motion
-            <>
-              <motion.div
-                initial={{ opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="price-unlocked-row"
-              >
-                <div className="price-val-wrapper">
-                  <span className="price-label">Trade Wholesale</span>
-                  <div className="price-val">₹{price.toLocaleString('en-IN')}</div>
+        {/* Card Body */}
+        <div className="pt-3">
+          <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase block">
+            {brand}
+          </span>
+
+          <h3 className="mt-1 text-sm font-bold text-slate-900 group-hover:text-red-600 line-clamp-2 leading-snug transition-colors duration-200 min-h-[40px]">
+            <Link href={`/products/${slug}`} title={name}>
+              {name}
+            </Link>
+          </h3>
+
+          {/* Technical Specs Preview */}
+          {specs && specs.length > 0 && (
+            <div className="mt-2.5 p-2 bg-[#F8FAFC] rounded-lg text-[11px] text-slate-500 flex flex-col gap-1">
+              {specs.slice(0, 2).map((sp, idx) => (
+                <div key={idx} className="flex justify-between items-center">
+                  <span className="text-slate-400">{sp.key}:</span>
+                  <span className="font-semibold text-slate-700 truncate max-w-[120px]">{sp.value}</span>
                 </div>
-                <span className="tax-badge">+ 18% GST</span>
-              </motion.div>
-
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAddToCart}
-                disabled={adding || stockStatus === 'out_of_stock'}
-                className="btn-primary"
-                style={{ width: '100%', padding: '8px 14px' }}
-              >
-                {added ? (
-                  <motion.span
-                    initial={{ scale: 0.7 }}
-                    animate={{ scale: 1 }}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                  >
-                    <Check size={15} />
-                    <span>Added to Cart</span>
-                  </motion.span>
-                ) : (
-                  <>
-                    <ShoppingCart size={15} />
-                    <span>{adding ? 'Adding...' : 'Add to Cart'}</span>
-                  </>
-                )}
-              </motion.button>
-            </>
-          ) : isAuthenticated && !isPriceVerified ? (
-            // Logged-in BUT Pending Verification: Show approval pending notice
-            <div
-              style={{
-                background: '#FEF3C7',
-                border: '1px solid #FDE68A',
-                borderRadius: 'var(--radius-md)',
-                padding: '9px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '0.78rem',
-              }}
-            >
-              <Clock size={15} style={{ color: '#B45309', flexShrink: 0 }} />
-              <div>
-                <div style={{ fontWeight: 700, color: '#92400E' }}>Rates Pending Approval</div>
-                <div style={{ color: '#B45309', fontSize: '0.7rem' }}>Awaiting admin verification</div>
-              </div>
-            </div>
-          ) : (
-            // Guest state: Price locked; redirect on click to Login per Section 2 & 4.1
-            <div className="price-locked-box">
-              <div className="price-locked-text">
-                <div className="price-locked-heading">
-                  <Lock size={13} />
-                  <span>Wholesale Rates Locked</span>
-                </div>
-                <span className="price-locked-sub">Sign in to view pricing</span>
-              </div>
-
-              <Link
-                href={`/login?redirect=/products/${slug}`}
-                className="btn-outline-amber"
-                style={{ fontSize: '0.75rem', padding: '5px 10px', whiteSpace: 'nowrap' }}
-              >
-                <span>Login</span>
-                <ArrowRight size={12} />
-              </Link>
+              ))}
             </div>
           )}
         </div>
+      </div>
+
+      {/* Card Footer with Price Gate */}
+      <div className="mt-4 pt-3 border-t border-slate-100">
+        {isAuthenticated && typeof price === 'number' ? (
+          // Logged-in & Verified: Reveal price & Add to Cart button
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-baseline justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Trade Wholesale</span>
+                <span className="text-lg font-black text-slate-900 tracking-tight">₹{price.toLocaleString('en-IN')}</span>
+              </div>
+              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">+ 18% GST</span>
+            </div>
+
+            <motion.button
+              whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+              onClick={handleAddToCart}
+              disabled={adding || stockStatus === 'out_of_stock'}
+              className="w-full h-9 flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 hover:bg-red-600 disabled:bg-slate-200 disabled:cursor-not-allowed text-white text-xs font-bold transition-colors duration-200 shadow-sm"
+            >
+              {added ? (
+                <motion.span
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  className="inline-flex items-center gap-1 text-emerald-400"
+                >
+                  <Check size={14} className="stroke-[3]" />
+                  <span>Added to Cart</span>
+                </motion.span>
+              ) : (
+                <>
+                  <ShoppingCart size={14} />
+                  <span>{adding ? 'Adding...' : 'Add to Cart'}</span>
+                </>
+              )}
+            </motion.button>
+          </div>
+        ) : isAuthenticated && !isPriceVerified ? (
+          // Logged-in BUT Pending Verification: Show approval pending notice
+          <div className="bg-amber-50 border border-amber-200/70 rounded-xl p-2.5 flex items-center gap-2 text-xs">
+            <Clock size={16} className="text-amber-600 shrink-0" />
+            <div>
+              <div className="font-bold text-amber-900 text-[11px]">Rates Pending Approval</div>
+              <div className="text-amber-700 text-[10px]">Awaiting admin verification</div>
+            </div>
+          </div>
+        ) : (
+          // Guest state: Price locked; redirect on click to Login per Section 2 & 4.1
+          <div className="flex items-center justify-between gap-2 p-2 bg-[#F5F5F7] rounded-xl border border-slate-200/60">
+            <div className="flex flex-col">
+              <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-800">
+                <Lock size={12} className="text-amber-600" />
+                <span>Wholesale Rates</span>
+              </div>
+              <span className="text-[10px] text-slate-400">Sign in to unlock</span>
+            </div>
+
+            <Link
+              href={`/login?redirect=/products/${slug}`}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-red-500 hover:text-red-600 text-slate-700 text-[11px] font-bold shadow-sm transition-all duration-200"
+            >
+              <span>Login</span>
+              <ArrowRight size={11} />
+            </Link>
+          </div>
+        )}
       </div>
     </motion.div>
   );

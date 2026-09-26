@@ -2,39 +2,36 @@
 
 /**
  * @file page.tsx
- * @route /
- * @description Homepage of Malik Hardware Mart.
- * Structured per docs/08-homepage-layout.md:
- * 1. Full-width Hero Carousel
- * 2. "Shop by Category" Circular Grid
- * 3. Promo Banner Strip (Row 1)
- * 4. "Shop by Use" Circular Grid
- * 5. Promo Banner Strip (Row 2)
- * 6. Featured Products Grid (with Section 7 server-side price gating)
- * 7. Institutional Contractor Trust Signals & B2B Trade Callout
+ * @description Main Malik Hardware Mart homepage.
+ * Apple & Google design system layout powered by Tailwind CSS and Framer Motion transitions.
+ * Sequence:
+ * 1. Hero Carousel (Edge-to-edge full width visual slider)
+ * 2. Shop by Category (Interactive cards grid)
+ * 3. Promo Banner Strip (Row 1: Banners 0-2)
+ * 4. Shop by Use (Industrial application contexts)
+ * 5. Promo Banner Strip (Row 2: Banners 3-5)
+ * 6. Featured Products Grid (Spotlight inventory with price gate)
+ * 7. Institutional Trust Signals & B2B Trade Callout
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
-  Shield,
   Truck,
-  CheckCircle,
   FileText,
-  Lock,
-  Sparkles,
-  Building2,
-  Clock,
   Award,
+  Building2,
+  Lock,
 } from 'lucide-react';
 import HeroCarousel from '@/components/HeroCarousel';
 import CategoryGrid from '@/components/CategoryGrid';
 import PromoBannerStrip from '@/components/PromoBannerStrip';
 import ProductCard from '@/components/ProductCard';
 import { useAuth } from '@/context/AuthContext';
+import { motion, useReducedMotion } from 'framer-motion';
 
-interface ProductItem {
+export interface ProductItem {
   _id: string;
   name: string;
   slug: string;
@@ -50,20 +47,17 @@ interface ProductItem {
   specs?: Array<{ key: string; value: string }>;
 }
 
-/**
- * Homepage Component.
- */
 export default function HomePage() {
   const { isAuthenticated, isPriceVerified } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const shouldReduceMotion = useReducedMotion();
 
   // Fetch featured products from server API
   useEffect(() => {
     async function loadFeatured() {
       try {
         setLoading(true);
-        // Server-side price gate is evaluated in this API call
         const prodRes = await fetch('/api/products?featured=true&limit=8');
         const prodData = await prodRes.json();
         if (prodData.success) {
@@ -80,7 +74,7 @@ export default function HomePage() {
   }, [isAuthenticated, isPriceVerified]);
 
   return (
-    <div style={{ background: 'var(--bg-primary)' }}>
+    <div className="bg-white min-h-screen">
       {/* 1. Full-Width Edge-To-Edge Hero Carousel */}
       <HeroCarousel />
 
@@ -97,57 +91,48 @@ export default function HomePage() {
       <PromoBannerStrip startIndex={3} limit={3} />
 
       {/* 6. Featured Products Grid Section */}
-      <section
-        style={{
-          padding: '60px 0',
-          background: 'var(--bg-secondary)',
-          borderTop: '1px solid var(--border-subtle)',
-          borderBottom: '1px solid var(--border-subtle)',
-        }}
+      <motion.section
+        initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="py-14 sm:py-16 bg-[#F8FAFC] border-y border-slate-200/80"
       >
-        <div className="container">
-          <div className="section-header" style={{ marginBottom: '32px' }}>
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 sm:mb-10">
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <span
-                  style={{
-                    background: 'var(--color-amber-bg)',
-                    color: 'var(--color-amber)',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    padding: '3px 9px',
-                    borderRadius: 'var(--radius-full)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                  }}
-                >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/80">
                   Spotlight Inventory
                 </span>
                 {!isAuthenticated && (
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)', fontWeight: 600 }}>
+                  <span className="text-xs text-slate-400 font-medium">
                     • Trade Pricing Hidden For Guests
                   </span>
                 )}
               </div>
-              <h2 className="section-title" style={{ fontSize: '2rem', fontWeight: 900 }}>
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
                 High-Demand Industrial Fasteners & Power Tools
               </h2>
-              <p className="section-subtitle" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-sm text-slate-500 max-w-xl mt-1.5 leading-relaxed">
                 Certified contractor-grade inventory ready for same-day dispatch from our Central Delhi logistics hub.
               </p>
             </div>
-            <Link href="/products" className="btn btn-outline" style={{ fontSize: '0.86rem' }}>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-slate-900 text-slate-800 hover:text-white border border-slate-200 text-xs font-bold transition-all duration-200 shadow-sm hover:shadow shrink-0 self-start md:self-auto"
+            >
               <span>View Full Catalog</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={13} />
             </Link>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
+            <div className="text-center py-16 text-slate-400 text-sm">
               Loading featured inventory...
             </div>
           ) : (
-            <div className="products-grid">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {featuredProducts.map((product) => (
                 <ProductCard
                   key={product._id}
@@ -165,71 +150,70 @@ export default function HomePage() {
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* 7. Institutional Trust Signals & Contractor B2B Callout */}
-      <section style={{ padding: '56px 0', background: 'var(--bg-primary)' }}>
-        <div className="container">
+      <motion.section
+        initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="py-14 sm:py-16 bg-white"
+      >
+        <div className="container mx-auto px-4 sm:px-6">
           {/* Trust badges row */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '24px',
-              marginBottom: '48px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16">
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <Truck size={20} />
               </div>
               <div>
-                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                <h4 className="text-sm font-bold text-slate-900 mb-0.5">
                   Same-Day Site Freight
                 </h4>
-                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                <p className="text-xs text-slate-500 leading-snug">
                   Dedicated fleet dispatch across Delhi-NCR & Northern industrial corridors.
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <FileText size={20} />
               </div>
               <div>
-                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                <h4 className="text-sm font-bold text-slate-900 mb-0.5">
                   100% GST ITC Invoicing
                 </h4>
-                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                <p className="text-xs text-slate-500 leading-snug">
                   Automated GSTR-2B compliance & E-Way bills generated per consignment.
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <Award size={20} />
               </div>
               <div>
-                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                <h4 className="text-sm font-bold text-slate-900 mb-0.5">
                   3.1 Mill Test Certificates
                 </h4>
-                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                <p className="text-xs text-slate-500 leading-snug">
                   Chemical analysis & proof-load certified for structural PEB compliance.
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-amber)', flexShrink: 0 }}>
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F5F5F7] border border-slate-200/60 hover:shadow-md transition-shadow duration-200">
+              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm shrink-0">
                 <Building2 size={20} />
               </div>
               <div>
-                <h4 style={{ fontSize: '0.98rem', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-main)' }}>
+                <h4 className="text-sm font-bold text-slate-900 mb-0.5">
                   Direct Factory Tie-ups
                 </h4>
-                <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                <p className="text-xs text-slate-500 leading-snug">
                   Authorized wholesale channels for Bosch, Tata Steel, Hilti, Fischer.
                 </p>
               </div>
@@ -238,55 +222,41 @@ export default function HomePage() {
 
           {/* Guest B2B Trade Call-To-Action Banner */}
           {!isAuthenticated && (
-            <div
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-medium)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '40px 48px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '24px',
-              }}
-            >
-              <div style={{ maxWidth: '640px' }}>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    color: 'var(--color-amber)',
-                    fontWeight: 800,
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    marginBottom: '8px',
-                  }}
-                >
-                  <Lock size={12} /> Commercial Trade Desk
+            <div className="relative rounded-3xl bg-slate-900 p-8 sm:p-12 text-white flex flex-col lg:flex-row lg:items-center justify-between gap-8 shadow-2xl overflow-hidden">
+              {/* Subtle ambient lighting accent */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 max-w-xl">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">
+                  <Lock size={13} /> Commercial Trade Desk
                 </span>
-                <h3 style={{ fontSize: '1.65rem', fontWeight: 900, marginBottom: '8px', color: 'var(--text-main)' }}>
+                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
                   Register Your Trade Account To Unlock Wholesale Rates
                 </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.94rem', lineHeight: 1.6, margin: 0 }}>
+                <p className="text-sm text-slate-300 mt-2.5 leading-relaxed">
                   Institutional pricing, bulk carton discount slabs, credit terms, and project consignments are gated behind trade verification.
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <Link href="/register" className="btn btn-primary" style={{ padding: '12px 24px', fontSize: '0.95rem' }}>
+              <div className="relative z-10 flex flex-wrap gap-3">
+                <Link
+                  href="/register"
+                  className="px-6 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-red-600/30 hover:shadow-red-600/50 transition-all duration-200"
+                >
                   Register Commercial Account
                 </Link>
-                <Link href="/login" className="btn btn-outline" style={{ padding: '12px 20px', fontSize: '0.95rem' }}>
+                <Link
+                  href="/login"
+                  className="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs sm:text-sm font-bold backdrop-blur-md transition-all duration-200"
+                >
                   Contractor Sign In
                 </Link>
               </div>
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }

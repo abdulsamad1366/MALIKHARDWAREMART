@@ -3,16 +3,16 @@
 /**
  * @file NavBottom.tsx
  * @description Part 3 of 3-part header navigation per docs/02-navigation.md.
- * Single row, horizontally scrollable on mobile:
+ * Apple & Google clean navigation bar with Tailwind CSS and Framer Motion dropdown.
+ * Single row, horizontally centered with touch-scroll fallback:
  * [ Home | Categories ▾ | Our Story | About Us | Contact Us | Blog ]
- * Includes interactive hover/click dropdown for all 7 industrial hardware divisions.
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, ArrowRight, Grid } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 interface CategoryItem {
   _id: string;
@@ -20,14 +20,12 @@ interface CategoryItem {
   slug: string;
 }
 
-/**
- * NavBottom component.
- */
 export default function NavBottom() {
   const pathname = usePathname();
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // Fetch categories for dropdown
   useEffect(() => {
@@ -89,112 +87,124 @@ export default function NavBottom() {
 
   const isCategoryActive = pathname.startsWith('/category') || pathname === '/products';
 
+  const navItems = [
+    { label: 'Home', href: '/', isActive: pathname === '/' },
+    { label: 'Our Story', href: '/our-story', isActive: pathname === '/our-story' },
+    { label: 'About Us', href: '/about-us', isActive: pathname === '/about-us' },
+    { label: 'Contact Us', href: '/contact-us', isActive: pathname === '/contact-us' },
+    { label: 'Blog', href: '/blog', isActive: pathname.startsWith('/blog') },
+  ];
+
   return (
-    <nav className="nav-bottom-band" aria-label="Main Navigation">
-      <div className="container nav-bottom-inner">
-        {/* Navigation Item: Home */}
-        <Link
-          href="/"
-          className={`nav-bottom-link ${pathname === '/' ? 'active' : ''}`}
-        >
-          Home
-        </Link>
-
-        {/* Navigation Item: Categories with Dropdown Menu */}
-        <div
-          ref={dropdownRef}
-          className="nav-dropdown-wrapper"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <button
-            type="button"
-            className={`nav-bottom-link nav-dropdown-trigger ${isCategoryActive ? 'active' : ''}`}
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            aria-expanded={dropdownOpen}
-            aria-haspopup="true"
+    <nav className="w-full bg-white/95 backdrop-blur-md border-b border-black/[0.05]" aria-label="Main Navigation">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-center gap-1 sm:gap-2 py-2 overflow-x-auto no-scrollbar">
+          
+          {/* Home Link */}
+          <Link
+            href="/"
+            className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 ${
+              pathname === '/'
+                ? 'text-red-600 bg-red-50/80 font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+            }`}
           >
-            <Grid size={15} style={{ marginRight: '6px' }} />
-            <span>Categories</span>
-            <ChevronDown
-              size={14}
-              className={`dropdown-chevron ${dropdownOpen ? 'rotated' : ''}`}
-            />
-          </button>
+            Home
+          </Link>
 
-          {/* Dropdown Menu Panel with Framer Motion */}
-          <AnimatePresence>
-            {dropdownOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                className="categories-dropdown-menu"
-                role="menu"
-              >
-                <div className="categories-dropdown-header">
-                  Industrial Hardware Divisions
-                </div>
-                <div className="categories-dropdown-grid">
-                  {categories.map((cat) => (
+          {/* Categories Dropdown */}
+          <div
+            ref={dropdownRef}
+            className="relative shrink-0"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <button
+              type="button"
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                isCategoryActive
+                  ? 'text-red-600 bg-red-50/80 font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+              }`}
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              aria-expanded={dropdownOpen}
+              aria-haspopup="true"
+            >
+              <Grid size={14} className="opacity-80" />
+              <span>Categories</span>
+              <ChevronDown
+                size={13}
+                className={`transition-transform duration-200 opacity-70 ${
+                  dropdownOpen ? 'rotate-180 text-red-600' : ''
+                }`}
+              />
+            </button>
+
+            {/* Invisible hover bridge */}
+            <div className="absolute top-full left-0 w-full h-2 pointer-events-auto" />
+
+            {/* Frosted Glass Dropdown Panel */}
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 w-[300px] sm:w-[340px] bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-2xl rounded-2xl p-2.5 z-[1100]"
+                  role="menu"
+                >
+                  <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    Industrial Hardware Divisions
+                  </div>
+                  <div className="flex flex-col gap-0.5 mt-1">
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat._id}
+                        href={`/category/${cat.slug}`}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                          pathname === `/category/${cat.slug}`
+                            ? 'bg-red-50 text-red-600 font-bold'
+                            : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-900'
+                        }`}
+                        role="menuitem"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <span>{cat.name}</span>
+                        <ArrowRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-slate-100 px-1">
                     <Link
-                      key={cat._id}
-                      href={`/category/${cat.slug}`}
-                      className={`category-dropdown-item ${pathname === `/category/${cat.slug}` ? 'active' : ''}`}
-                      role="menuitem"
+                      href="/products"
+                      className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900 hover:bg-red-600 text-white text-xs font-bold transition-colors duration-200"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      <span>{cat.name}</span>
+                      <span>View All Catalog Products</span>
+                      <ArrowRight size={13} />
                     </Link>
-                  ))}
-                </div>
-                <div className="categories-dropdown-footer">
-                  <Link
-                    href="/products"
-                    className="view-all-products-link"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <span>View All Catalog Products</span>
-                    <ArrowRight size={14} />
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Remaining Nav Links */}
+          {navItems.slice(1).map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 ${
+                item.isActive
+                  ? 'text-red-600 bg-red-50/80 font-bold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
-
-        {/* Navigation Item: Our Story */}
-        <Link
-          href="/our-story"
-          className={`nav-bottom-link ${pathname === '/our-story' ? 'active' : ''}`}
-        >
-          Our Story
-        </Link>
-
-        {/* Navigation Item: About Us */}
-        <Link
-          href="/about-us"
-          className={`nav-bottom-link ${pathname === '/about-us' ? 'active' : ''}`}
-        >
-          About Us
-        </Link>
-
-        {/* Navigation Item: Contact Us */}
-        <Link
-          href="/contact-us"
-          className={`nav-bottom-link ${pathname === '/contact-us' ? 'active' : ''}`}
-        >
-          Contact Us
-        </Link>
-
-        {/* Navigation Item: Blog */}
-        <Link
-          href="/blog"
-          className={`nav-bottom-link ${pathname.startsWith('/blog') ? 'active' : ''}`}
-        >
-          Blog
-        </Link>
       </div>
     </nav>
   );

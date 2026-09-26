@@ -1,8 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Roboto", "Segoe UI", sans-serif;
+  --color-apple-canvas: #FFFFFF;
+  --color-apple-subtle: #F5F5F7;
+  --color-apple-dark: #1D1D1F;
+  --color-apple-gray: #6E6E73;
+  --color-apple-light-gray: #86868B;
+  --color-brand-red: #DC2626;
+  --color-brand-red-hover: #B91C1C;
+  --color-brand-red-subtle: #FEF2F2;
+  --color-brand-amber: #D97706;
+  --color-brand-dark: #0F172A;
+  --shadow-apple-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-apple-md: 0 4px 14px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
+  --shadow-apple-lg: 0 12px 30px rgba(0, 0, 0, 0.07), 0 4px 10px rgba(0, 0, 0, 0.03);
+  --shadow-apple-hover: 0 16px 36px -6px rgba(0, 0, 0, 0.08), 0 6px 14px -3px rgba(0, 0, 0, 0.03);
+}
+
 /**
  * @file globals.css
- * @description Minimal, crisp Light Design System for Malik Hardware Mart.
- * Clean Scandinavian-inspired typography, light slate surfaces, restrained industrial accents,
- * soft natural shadows, and high-readability B2B trade components.
+ * @description Apple & Google Minimalist Design System for Malik Hardware Mart with Tailwind CSS v4.
+ * Clean typography, light canvas, restrained industrial accents, soft ambient elevation,
+ * and high-readability B2B trade components.
  */
 
 :root {

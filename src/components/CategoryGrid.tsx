@@ -2,10 +2,9 @@
 
 /**
  * @file CategoryGrid.tsx
- * @description Modern responsive card grid component for homepage.
+ * @description Apple & Google design system card grid component with Tailwind CSS & Framer Motion.
  * Reusable for both "Shop by Category" and "Shop by Application" (Use Cases)
  * per docs/08-homepage-layout.md and docs/09-design-motion-guidelines.md.
- * Links to /category/[slug] or /use/[slug].
  */
 
 import React, { useState, useEffect } from 'react';
@@ -30,10 +29,6 @@ interface CategoryGridProps {
   items?: GridItem[];
 }
 
-/**
- * CategoryGrid Component.
- * Displays interactive cards for categories or application use-cases.
- */
 export default function CategoryGrid({
   source = 'category',
   title,
@@ -81,72 +76,79 @@ export default function CategoryGrid({
     return item.placeholderImage || item.image || '/images/products/default-product.png';
   };
 
-  const gridCols = Math.min(items.length || 7, 7);
-
   return (
-    <section className="category-grid-section">
-      <div className="container">
+    <motion.section
+      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className="py-12 sm:py-14 bg-white"
+    >
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Section Heading */}
-        <div className="category-section-header">
-          <h2 className="category-section-title">
+        <div className="text-center mb-8 sm:mb-10">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 uppercase inline-block relative">
             {title || defaultTitle}
+            <span className="block w-12 h-1 bg-red-600 rounded-full mx-auto mt-2.5" />
           </h2>
           {subtitle && (
-            <p className="category-section-subtitle">{subtitle}</p>
+            <p className="text-sm text-slate-500 max-w-xl mx-auto mt-3 leading-relaxed">
+              {subtitle}
+            </p>
           )}
         </div>
 
         {/* Cards Grid */}
         {loading ? (
-          <div className="category-loading-state">
+          <div className="text-center py-12 text-slate-400 text-sm">
             Loading {source === 'category' ? 'categories' : 'applications'}...
           </div>
         ) : (
-          <div
-            className="category-cards-grid"
-            style={{ '--cards-cols': gridCols } as React.CSSProperties}
-          >
-            {items.map((item) => {
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 w-full">
+            {items.map((item, idx) => {
               const href = getHref(item);
               const imgSrc = getImageSrc(item);
 
               return (
                 <motion.div
                   key={item._id}
-                  className="category-card-col"
+                  initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: 0.35,
+                    delay: shouldReduceMotion ? 0 : Math.min(idx * 0.04, 0.28),
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
                   whileHover={shouldReduceMotion ? undefined : { y: -5 }}
-                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex"
                 >
                   <Link
                     href={href}
-                    className="home-category-card"
+                    className="group flex flex-col justify-between w-full bg-white border border-slate-200/80 rounded-2xl p-2.5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.08)] hover:border-red-500/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 transition-all duration-300"
                     aria-label={`Explore ${item.name}`}
                   >
-                    {/* Card Media / Image Frame */}
-                    <div className="category-card-media">
+                    {/* Media frame */}
+                    <div className="relative w-full aspect-[16/11] rounded-xl overflow-hidden bg-slate-900 shadow-inner">
                       <Image
                         src={imgSrc}
                         alt={item.name}
                         fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1180px) 25vw, 15vw"
-                        style={{
-                          objectFit: 'cover',
-                          transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-                        }}
-                        className="category-card-img"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
+                        className="object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
                       />
-                      <div className="category-card-media-overlay" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                     </div>
 
-                    {/* Card Body */}
-                    <div className="category-card-body">
-                      <h3 className="category-card-name">
+                    {/* Content */}
+                    <div className="flex flex-col justify-between flex-1 pt-3 pb-1 text-center">
+                      <h3 className="text-xs sm:text-[13px] font-bold text-slate-800 group-hover:text-red-600 line-clamp-2 leading-snug transition-colors duration-200">
                         {item.name}
                       </h3>
-                      <span className="category-card-cta">
+                      <div className="inline-flex items-center justify-center gap-1 mt-2 text-[11px] font-semibold text-slate-400 group-hover:text-red-600 transition-colors duration-200">
                         <span>Explore</span>
-                        <ArrowRight size={13} className="category-card-arrow" />
-                      </span>
+                        <ArrowRight size={11} className="transition-transform duration-200 group-hover:translate-x-1" />
+                      </div>
                     </div>
                   </Link>
                 </motion.div>
@@ -155,187 +157,6 @@ export default function CategoryGrid({
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .category-grid-section {
-          padding: 52px 0;
-          background: var(--bg-primary, #FFFFFF);
-        }
-
-        .category-section-header {
-          text-align: center;
-          margin-bottom: 32px;
-        }
-
-        .category-section-title {
-          font-size: clamp(1.6rem, 2.8vw, 2.1rem);
-          font-weight: 900;
-          letter-spacing: -0.025em;
-          color: var(--text-main, #0F172A);
-          text-transform: uppercase;
-          margin: 0;
-          display: inline-block;
-          position: relative;
-        }
-
-        .category-section-title::after {
-          content: '';
-          display: block;
-          width: 48px;
-          height: 3px;
-          background: #DC2626;
-          margin: 10px auto 0;
-          border-radius: 2px;
-        }
-
-        .category-section-subtitle {
-          color: var(--text-muted, #475569);
-          font-size: 0.95rem;
-          max-width: 640px;
-          margin: 12px auto 0;
-          line-height: 1.5;
-        }
-
-        .category-loading-state {
-          text-align: center;
-          padding: 48px 0;
-          color: var(--text-dim, #94A3B8);
-          font-size: 0.95rem;
-        }
-
-        .category-cards-grid {
-          display: grid;
-          grid-template-columns: repeat(var(--cards-cols, 7), 1fr);
-          gap: 16px;
-          width: 100%;
-        }
-
-        .category-card-col {
-          display: flex;
-          min-width: 0;
-        }
-
-        .home-category-card {
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-          background: var(--bg-card, #FFFFFF);
-          border: 1px solid var(--border-subtle, #E2E8F0);
-          border-radius: 12px;
-          padding: 10px;
-          text-decoration: none;
-          cursor: pointer;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-          transition: border-color 0.25s ease, box-shadow 0.25s ease;
-          overflow: hidden;
-        }
-
-        .home-category-card:hover {
-          border-color: #DC2626;
-          box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-        }
-
-        .home-category-card:focus-visible {
-          outline: 2px solid #DC2626;
-          outline-offset: 2px;
-        }
-
-        .category-card-media {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 16 / 11;
-          border-radius: 8px;
-          overflow: hidden;
-          background: #0F172A;
-        }
-
-        .home-category-card:hover :global(.category-card-img) {
-          transform: scale(1.06);
-        }
-
-        .category-card-media-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(180deg, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.35) 100%);
-          pointer-events: none;
-        }
-
-        .category-card-body {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          flex: 1;
-          padding: 12px 4px 4px;
-          text-align: center;
-        }
-
-        .category-card-name {
-          font-size: 0.88rem;
-          font-weight: 700;
-          color: var(--text-main, #0F172A);
-          line-height: 1.35;
-          margin: 0 0 8px;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          transition: color 0.2s ease;
-        }
-
-        .home-category-card:hover .category-card-name {
-          color: #DC2626;
-        }
-
-        .category-card-cta {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          font-size: 0.78rem;
-          font-weight: 600;
-          color: var(--text-muted, #64748B);
-          transition: color 0.2s ease;
-        }
-
-        :global(.category-card-arrow) {
-          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .home-category-card:hover :global(.category-card-arrow) {
-          transform: translateX(4px);
-        }
-
-        .home-category-card:hover .category-card-cta {
-          color: #DC2626;
-        }
-
-        @media (max-width: 1180px) {
-          .category-cards-grid {
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 14px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .category-cards-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-          .category-card-name {
-            font-size: 0.82rem;
-          }
-          .category-section-title {
-            font-size: 1.5rem;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .home-category-card:hover :global(.category-card-img),
-          .home-category-card:hover :global(.category-card-arrow) {
-            transform: none !important;
-          }
-        }
-      `}</style>
-    </section>
+    </motion.section>
   );
 }

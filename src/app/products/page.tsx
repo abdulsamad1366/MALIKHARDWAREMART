@@ -4,6 +4,7 @@
  * @file page.tsx
  * @route /products
  * @description Catalog listing page with multi-facet filtering (category, brand, search keyword).
+ * Styled with Apple & Google design system using Tailwind CSS and Framer Motion.
  * Enforces Section 7 server-side price gating: price is omitted from the API response for guests
  * and unlocked with 'Add to Cart' buttons for authenticated users.
  */
@@ -13,6 +14,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, RotateCcw, Lock, Check } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { useAuth } from '@/context/AuthContext';
+import { motion, useReducedMotion } from 'framer-motion';
 
 interface CategoryItem {
   _id: string;
@@ -25,7 +27,6 @@ interface ProductItem {
   name: string;
   slug: string;
   brand: string;
-  // PRICE GATE: do not send price to unauthenticated requests
   price?: number;
   imageUrl?: string | null;
   stockStatus: 'in_stock' | 'out_of_stock' | 'on_request';
@@ -37,14 +38,12 @@ interface ProductItem {
   specs?: Array<{ key: string; value: string }>;
 }
 
-/**
- * Catalog Content with search parameters inspection.
- */
 function CatalogContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [, startTransition] = useTransition();
+  const shouldReduceMotion = useReducedMotion();
 
   // Query states
   const categoryParam = searchParams.get('category') || '';
@@ -58,7 +57,6 @@ function CatalogContent() {
   const [selectedBrand, setSelectedBrand] = useState(brandParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
 
-  // Available brands derived from products or static list
   const availableBrands = [
     'Bosch',
     'Stanley',
@@ -76,14 +74,12 @@ function CatalogContent() {
     'Bostik',
   ];
 
-  // Synchronize state when URL query parameters change
   useEffect(() => {
     setSearchTerm(searchParam);
     setSelectedBrand(brandParam);
     setSelectedCategory(categoryParam);
   }, [searchParam, brandParam, categoryParam]);
 
-  // Load categories
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -99,7 +95,6 @@ function CatalogContent() {
     fetchCategories();
   }, []);
 
-  // Fetch filtered products from API
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -109,7 +104,6 @@ function CatalogContent() {
         if (selectedBrand) params.set('brand', selectedBrand);
         if (searchTerm) params.set('search', searchTerm);
 
-        // Server-side price gate is executed inside this endpoint
         const res = await fetch(`/api/products?${params.toString()}`);
         const data = await res.json();
         if (data.success) {
@@ -125,23 +119,17 @@ function CatalogContent() {
     fetchProducts();
   }, [selectedCategory, selectedBrand, searchTerm, isAuthenticated]);
 
-  /**
-   * Applies filters and updates the browser URL without full page reload.
-   */
-  const applyFilter = (newCat: string, newBrand: string, newSearch: string) => {
+  const applyFilter = (cat: string, brd: string, q: string) => {
     const params = new URLSearchParams();
-    if (newCat) params.set('category', newCat);
-    if (newBrand) params.set('brand', newBrand);
-    if (newSearch) params.set('search', newSearch);
+    if (cat) params.set('category', cat);
+    if (brd) params.set('brand', brd);
+    if (q) params.set('search', q);
 
     startTransition(() => {
-      router.push(`/products${params.toString() ? `?${params.toString()}` : ''}`);
+      router.push(`/products?${params.toString()}`);
     });
   };
 
-  /**
-   * Clears all active filters.
-   */
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedBrand('');
@@ -152,63 +140,41 @@ function CatalogContent() {
   };
 
   return (
-    <div style={{ padding: '40px 0' }}>
-      <div className="container">
+    <div className="py-10 sm:py-12 bg-white min-h-screen">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Page Title & Breadcrumb Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '8px' }}>
+        <div className="mb-8 sm:mb-10">
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2">
             <span>Home</span>
             <span>/</span>
-            <span style={{ color: 'var(--color-amber)', fontWeight: 600 }}>Wholesale Catalog</span>
+            <span className="text-red-600 font-bold">Wholesale Catalog</span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
             <div>
-              <h1 style={{ fontSize: '2.2rem', fontWeight: 900 }}>Commercial Hardware Catalog</h1>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '4px' }}>
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                Commercial Hardware Catalog
+              </h1>
+              <p className="text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
                 Browse verified industrial supplies, technical specifications, and live warehouse inventory.
               </p>
             </div>
 
             {/* Authentication & Price Visibility Banner */}
             {!isAuthenticated ? (
-              <div
-                style={{
-                  background: 'rgba(245, 158, 11, 0.08)',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  fontSize: '0.85rem',
-                }}
-              >
-                <Lock size={16} style={{ color: 'var(--color-amber)' }} />
-                <span>Guest View: Wholesale prices are hidden.</span>
+              <div className="inline-flex items-center gap-3 p-3 bg-amber-50 border border-amber-200/80 rounded-2xl text-xs text-amber-900">
+                <Lock size={15} className="text-amber-600 shrink-0" />
+                <span className="font-medium">Guest View: Wholesale prices are hidden.</span>
                 <button
                   onClick={() => router.push('/login?redirect=/products')}
-                  className="btn-outline-amber"
-                  style={{ padding: '4px 10px', fontSize: '0.78rem' }}
+                  className="px-3 py-1 rounded-full bg-slate-900 hover:bg-red-600 text-white font-bold text-[11px] transition-colors"
                 >
                   Login to unlock
                 </button>
               </div>
             ) : (
-              <div
-                style={{
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '8px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '0.85rem',
-                  color: 'var(--color-emerald)',
-                }}
-              >
-                <Check size={16} />
+              <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-50 border border-emerald-200/80 rounded-2xl text-xs font-bold text-emerald-800">
+                <Check size={16} className="text-emerald-600 stroke-[3]" />
                 <span>Trade Pricing & Add-to-Cart Unlocked</span>
               </div>
             )}
@@ -216,30 +182,16 @@ function CatalogContent() {
         </div>
 
         {/* Filter Controls Toolbar */}
-        <div
-          style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '20px',
-            marginBottom: '32px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '16px',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
+        <div className="bg-[#F5F5F7] border border-slate-200/80 rounded-2xl p-4 mb-8 flex flex-wrap gap-3 items-center justify-between shadow-sm">
           {/* Search Box */}
-          <div style={{ flex: '1 1 280px', position: 'relative' }}>
+          <div className="relative flex-1 min-w-[240px]">
             <Search
-              size={18}
-              style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }}
+              size={17}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
             />
             <input
               type="text"
-              className="form-input"
-              style={{ paddingLeft: '42px', height: '44px' }}
+              className="w-full h-11 pl-10 pr-4 bg-white rounded-xl text-sm text-slate-800 placeholder:text-slate-400 border border-slate-200/80 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10 transition-all"
               placeholder="Filter by keyword (e.g. 'Bosch', 'SS-304', 'Valve')..."
               value={searchTerm}
               onChange={(e) => {
@@ -250,10 +202,9 @@ function CatalogContent() {
           </div>
 
           {/* Category Dropdown */}
-          <div style={{ flex: '0 1 220px' }}>
+          <div className="w-full sm:w-auto sm:min-w-[200px]">
             <select
-              className="form-select"
-              style={{ height: '44px' }}
+              className="w-full h-11 px-4 bg-white rounded-xl text-sm font-medium text-slate-800 border border-slate-200/80 focus:outline-none focus:border-red-500"
               value={selectedCategory}
               onChange={(e) => {
                 setSelectedCategory(e.target.value);
@@ -270,10 +221,9 @@ function CatalogContent() {
           </div>
 
           {/* Brand Dropdown */}
-          <div style={{ flex: '0 1 200px' }}>
+          <div className="w-full sm:w-auto sm:min-w-[180px]">
             <select
-              className="form-select"
-              style={{ height: '44px' }}
+              className="w-full h-11 px-4 bg-white rounded-xl text-sm font-medium text-slate-800 border border-slate-200/80 focus:outline-none focus:border-red-500"
               value={selectedBrand}
               onChange={(e) => {
                 setSelectedBrand(e.target.value);
@@ -293,50 +243,42 @@ function CatalogContent() {
           {(selectedCategory || selectedBrand || searchTerm) && (
             <button
               onClick={handleClearFilters}
-              className="btn-secondary"
-              style={{ height: '44px', padding: '0 16px', fontSize: '0.85rem' }}
+              className="inline-flex items-center gap-1.5 h-11 px-4 rounded-xl bg-slate-200/80 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-colors"
             >
-              <RotateCcw size={15} />
+              <RotateCcw size={14} />
               <span>Reset</span>
             </button>
           )}
         </div>
 
-        {/* Results Counter & Active Filter Pills */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Showing <strong style={{ color: 'var(--text-main)' }}>{products.length}</strong> products
-            {selectedCategory && ` in category '${selectedCategory}'`}
-            {selectedBrand && ` by '${selectedBrand}'`}
-          </div>
+        {/* Results Counter */}
+        <div className="text-xs font-semibold text-slate-500 mb-6">
+          Showing <span className="font-bold text-slate-900">{products.length}</span> products
+          {selectedCategory && ` in category '${selectedCategory}'`}
+          {selectedBrand && ` by '${selectedBrand}'`}
         </div>
 
         {/* Products Grid */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
+          <div className="text-center py-20 text-slate-400 text-sm">
             Loading catalog specifications...
           </div>
         ) : products.length === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '60px 20px',
-              background: 'var(--bg-card)',
-              borderRadius: 'var(--radius-lg)',
-              border: '1px dashed var(--border-medium)',
-            }}
-          >
-            <Filter size={40} style={{ color: 'var(--color-amber)', margin: '0 auto 16px' }} />
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '8px' }}>No products match your criteria</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '20px' }}>
+          <div className="text-center py-16 px-4 bg-[#F5F5F7] rounded-3xl border border-dashed border-slate-300 max-w-lg mx-auto">
+            <Filter size={36} className="text-slate-400 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-slate-800 mb-1">No products match your criteria</h3>
+            <p className="text-xs text-slate-500 mb-4">
               Try adjusting your category, brand, or search filters.
             </p>
-            <button onClick={handleClearFilters} className="btn-primary">
+            <button
+              onClick={handleClearFilters}
+              className="px-4 py-2 bg-slate-900 text-white rounded-full text-xs font-bold hover:bg-red-600 transition-colors"
+            >
               Clear All Filters
             </button>
           </div>
         ) : (
-          <div className="products-grid">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {products.map((product) => (
               <ProductCard
                 key={product._id}
@@ -358,12 +300,9 @@ function CatalogContent() {
   );
 }
 
-/**
- * Root Products Page with Suspense boundary for useSearchParams.
- */
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-muted)' }}>Loading catalog...</div>}>
+    <Suspense fallback={<div className="text-center py-20 text-slate-400 text-sm">Loading catalog...</div>}>
       <CatalogContent />
     </Suspense>
   );
