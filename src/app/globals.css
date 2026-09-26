@@ -1188,30 +1188,48 @@ input, select, textarea {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* Part 1: Marquee Banner - Dark Edge-to-Edge */
+/* Part 1: Marquee Banner - Vibrant Red Engineered Finish */
 .marquee-band {
-  background: #0F172A;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(90deg, #991B1B 0%, #B91C1C 20%, #DC2626 50%, #B91C1C 80%, #991B1B 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   padding: 8px 0;
-  font-size: 0.82rem;
-  color: #F8FAFC;
+  font-size: 0.8rem;
+  color: #FFFFFF;
   overflow: hidden;
   width: 100%;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.25);
+  user-select: none;
 }
 
+/* Subtle top highlight sheen line */
+.marquee-band::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35) 50%, transparent);
+  pointer-events: none;
+}
+
+/* Edge Fade Mask for smooth entry & exit */
 .marquee-scroll-window {
   width: 100%;
   overflow: hidden;
   white-space: nowrap;
   position: relative;
   display: flex;
+  mask-image: linear-gradient(to right, transparent, black 48px, black calc(100% - 48px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 48px, black calc(100% - 48px), transparent);
 }
 
 .marquee-track {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  animation: marquee-scroll var(--marquee-speed, 90s) linear infinite;
+  animation: marquee-scroll var(--marquee-speed, 70s) linear infinite;
   will-change: transform;
 }
 
@@ -1220,23 +1238,88 @@ input, select, textarea {
 }
 
 .marquee-item {
-  font-weight: 500;
-  color: #F8FAFC;
+  font-weight: 600;
+  color: #FFFFFF;
   letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+/* Live Announcement Pill Badge */
+.marquee-alert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #FEF08A;
+}
+
+/* Pulsing Live Beacon */
+.marquee-beacon {
+  position: relative;
+  display: inline-flex;
+  width: 7px;
+  height: 7px;
+}
+
+.beacon-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: #FACC15;
+  opacity: 0.75;
+  animation: beacon-ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.beacon-dot {
+  position: relative;
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background-color: #FEF08A;
+}
+
+@keyframes beacon-ping {
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.marquee-text-body {
+  font-weight: 600;
+  color: #FFFFFF;
+  letter-spacing: 0.015em;
+}
+
+/* Separator with glowing amber tech star */
 .marquee-separator {
-  margin: 0 24px;
-  color: var(--color-amber);
-  font-size: 0.95rem;
+  margin: 0 28px;
+  color: #FEF08A;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 4px rgba(254, 240, 138, 0.6));
 }
 
 @keyframes marquee-scroll {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
